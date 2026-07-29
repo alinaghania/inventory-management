@@ -84,7 +84,7 @@
             <div class="order-health-container">
               <!-- Left: Donut Chart -->
               <div class="order-health-chart">
-                <svg viewBox="0 0 200 200" class="donut-svg-compact">
+                <svg viewBox="0 0 200 200" class="donut-svg-compact" role="img" :aria-label="orderHealthChartLabel">
                   <circle cx="100" cy="100" r="65" fill="none" stroke="#e2e8f0" stroke-width="25"/>
                   <circle cx="100" cy="100" r="65" fill="none" stroke="#10b981" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.delivered)} 408`"
@@ -180,7 +180,7 @@
                   <th>{{ t('dashboard.inventoryShortages.shortage') }}</th>
                   <th>{{ t('dashboard.inventoryShortages.daysDelayed') }}</th>
                   <th>{{ t('dashboard.inventoryShortages.priority') }}</th>
-                  <th>Actions</th>
+                  <th>{{ t('dashboard.inventoryShortages.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,7 +312,7 @@ export default {
     BacklogDetailModal,
   },
   setup() {
-    const { t, currentCurrency, translateProductName, translateWarehouse } = useI18n()
+    const { t, currentCurrency, currentLocale, translateProductName, translateWarehouse } = useI18n()
     const loading = ref(true)
     const error = ref(null)
     const summary = ref({})
@@ -363,6 +363,18 @@ export default {
         if (counts[status] !== undefined) counts[status]++
       })
       return counts
+    })
+
+    // The donut conveys the status split visually only, so give assistive tech
+    // the same numbers as a sentence
+    const orderHealthChartLabel = computed(() => {
+      const { delivered, shipped, processing, backordered } = statusData.value
+      return [
+        `${t('status.delivered')}: ${delivered}`,
+        `${t('status.shipped')}: ${shipped}`,
+        `${t('status.processing')}: ${processing}`,
+        `${t('status.backordered')}: ${backordered}`
+      ].join(', ')
     })
 
     const orderHealthMetrics = computed(() => {
@@ -490,15 +502,20 @@ export default {
       // Calculate top products from filtered order data
       const productMap = {}
 
+      // Indexed once instead of scanning inventoryItems per order line, which
+      // made this computed O(order lines x inventory items)
+      const inventoryBySku = new Map(
+        inventoryItems.value.map(item => [item.sku, item])
+      )
+
       // allOrders is already filtered by API based on: month, warehouse, category, status
       allOrders.value.forEach(order => {
         if (order.items) {
           order.items.forEach(item => {
             const sku = item.sku
 
-            // Find matching inventory item to get full product details
             // Note: inventoryItems is also filtered by API based on: warehouse, category
-            const invItem = inventoryItems.value.find(i => i.sku === sku)
+            const invItem = inventoryBySku.get(sku)
 
             // Skip products that don't match current inventory filters
             // (e.g., if filtering by warehouse A, don't show products from warehouse B)
@@ -634,7 +651,6 @@ export default {
 
     const formatDate = (dateString) => {
       if (!dateString) return '-'
-      const { currentLocale } = useI18n()
       const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
       const date = new Date(dateString)
       return date.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -687,6 +703,7 @@ export default {
       ordersData,
       fillRate,
       statusData,
+      orderHealthChartLabel,
       orderHealthMetrics,
       categoryData,
       maxCategoryValue,
@@ -1268,4 +1285,13 @@ export default {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(100, 116, 139, 0.3);
 }
+
+/* The :focus rule above clears the outline in favour of a border/shadow
+   treatment, which the global :focus-visible ring cannot override. Restore an
+   explicit ring for keyboard users. */
+.task-input:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
 </style>

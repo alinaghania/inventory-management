@@ -92,8 +92,8 @@ export function useAuth() {
   const isAuthenticated = ref(true)
 
   const logout = () => {
-    // In a real app, this would clear tokens, etc.
-    console.log('Logout clicked - would redirect to login')
+    // In a real app, this would clear tokens, etc. The alert below is the stub's
+    // only feedback, so the log that used to sit here was pure noise.
     alert('Logout functionality - in a real app, this would clear session and redirect to login')
   }
 

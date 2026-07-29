@@ -2,10 +2,18 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="isOpen" class="modal-overlay" @click="close">
-        <div class="modal-container tasks-modal-container" @click.stop>
+        <div
+          ref="modalContainer"
+          class="modal-container tasks-modal-container"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tasks-modal-title"
+          tabindex="-1"
+          @click.stop
+        >
           <div class="modal-header">
-            <h3 class="modal-title">{{ t('tasks.title') }}</h3>
-            <button class="close-button" @click="close">
+            <h3 id="tasks-modal-title" class="modal-title">{{ t('tasks.title') }}</h3>
+            <button class="close-button" :aria-label="t('common.close')" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
@@ -82,10 +90,16 @@
                       :checked="task.status === 'completed'"
                       @change="$emit('toggle-task', task.id)"
                       class="task-checkbox"
+                      :aria-label="task.title"
                     />
                     <span class="task-title" @click="$emit('toggle-task', task.id)">{{ task.title }}</span>
                   </div>
-                  <button @click="$emit('delete-task', task.id)" class="task-delete-btn" title="Delete task">
+                  <button
+                    class="task-delete-btn"
+                    :title="t('tasks.deleteTask')"
+                    :aria-label="`${t('tasks.deleteTask')}: ${task.title}`"
+                    @click="confirmDelete(task)"
+                  >
                     ×
                   </button>
                 </div>
@@ -120,6 +134,7 @@
 
 <script>
 import { ref, computed } from 'vue'
+import { useModalA11y } from '../composables/useModalA11y'
 import { useI18n } from '../composables/useI18n'
 
 export default {
@@ -150,6 +165,16 @@ export default {
 
     const close = () => {
       emit('close')
+    }
+
+    const modalContainer = ref(null)
+    useModalA11y(() => props.isOpen, modalContainer, close)
+
+    // Deleting a task was previously a single unguarded click with no undo
+    const confirmDelete = (task) => {
+      if (window.confirm(t('tasks.confirmDelete', { title: task.title }))) {
+        emit('delete-task', task.id)
+      }
     }
 
     const handleAddTask = () => {
@@ -234,6 +259,8 @@ export default {
       newTask,
       sortedTasks,
       close,
+      modalContainer,
+      confirmDelete,
       handleAddTask,
       formatDueDate,
       getStatusClass,
@@ -618,4 +645,13 @@ label {
 .modal-leave-to .modal-container {
   transform: scale(0.9);
 }
+
+/* The :focus rule above clears the outline in favour of a border/shadow
+   treatment, which the global :focus-visible ring cannot override. Restore an
+   explicit ring for keyboard users. */
+.task-input:focus-visible, .task-select:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
 </style>

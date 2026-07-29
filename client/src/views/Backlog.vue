@@ -11,15 +11,15 @@
       <div class="stats-grid">
         <div class="stat-card danger">
           <div class="stat-label">High Priority</div>
-          <div class="stat-value">{{ getBacklogByPriority('high').length }}</div>
+          <div class="stat-value">{{ backlogPriorityCounts.high }}</div>
         </div>
         <div class="stat-card warning">
           <div class="stat-label">Medium Priority</div>
-          <div class="stat-value">{{ getBacklogByPriority('medium').length }}</div>
+          <div class="stat-value">{{ backlogPriorityCounts.medium }}</div>
         </div>
         <div class="stat-card info">
           <div class="stat-label">Low Priority</div>
-          <div class="stat-value">{{ getBacklogByPriority('low').length }}</div>
+          <div class="stat-value">{{ backlogPriorityCounts.low }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Total Backlog Items</div>
@@ -130,9 +130,14 @@ export default {
       }
     }
 
-    const getBacklogByPriority = (priority) => {
-      return backlogItems.value.filter(item => item.priority === priority)
-    }
+    // Counts for the three stat cards, tallied in one pass per data change
+    const backlogPriorityCounts = computed(() => {
+      const counts = { high: 0, medium: 0, low: 0 }
+      backlogItems.value.forEach(item => {
+        if (counts[item.priority] !== undefined) counts[item.priority]++
+      })
+      return counts
+    })
 
     // Watch for filter changes and reload data
     watch([selectedLocation, selectedCategory], () => {
@@ -145,7 +150,7 @@ export default {
       loading,
       error,
       backlogItems,
-      getBacklogByPriority
+      backlogPriorityCounts
     }
   }
 }

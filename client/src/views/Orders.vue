@@ -11,19 +11,19 @@
       <div class="stats-grid">
         <div class="stat-card success">
           <div class="stat-label">{{ t('status.delivered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Delivered').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Delivered }}</div>
         </div>
         <div class="stat-card info">
           <div class="stat-label">{{ t('status.shipped') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Shipped').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Shipped }}</div>
         </div>
         <div class="stat-card warning">
           <div class="stat-label">{{ t('status.processing') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Processing').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Processing }}</div>
         </div>
         <div class="stat-card danger">
           <div class="stat-label">{{ t('status.backordered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Backordered').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Backordered }}</div>
         </div>
       </div>
 
@@ -77,6 +77,18 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
+          <button
+            class="btn btn-secondary"
+            :disabled="orders.length === 0"
+            :title="t('common.exportCsvTitle')"
+            @click="exportOrdersCsv"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+            </svg>
+            {{ t('common.exportCsv') }}
+          </button>
         </div>
         <div class="table-container">
           <table class="orders-table">
@@ -130,11 +142,12 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { useCsvExport } from '../composables/useCsvExport'
 
 export default {
   name: 'Orders',
   setup() {
-    const { t, currentCurrency, translateProductName, translateCustomerName } = useI18n()
+    const { t, currentCurrency, currentLocale, translateProductName, translateCustomerName } = useI18n()
 
     const currencySymbol = computed(() => {
       return currentCurrency.value === 'JPY' ? '¥' : '$'
@@ -152,6 +165,8 @@ export default {
       selectedStatus,
       getCurrentFilters
     } = useFilters()
+
+    const { exportCsv } = useCsvExport()
 
     const loadOrders = async () => {
       try {
@@ -185,9 +200,15 @@ export default {
       loadOrders()
     })
 
-    const getOrdersByStatus = (status) => {
-      return orders.value.filter(order => order.status === status)
-    }
+    // The four stat cards only need counts, so tally in one pass instead of
+    // filtering the whole order list once per card on every render
+    const orderStatusCounts = computed(() => {
+      const counts = { Delivered: 0, Shipped: 0, Processing: 0, Backordered: 0 }
+      orders.value.forEach(order => {
+        if (counts[order.status] !== undefined) counts[order.status]++
+      })
+      return counts
+    })
 
     const getOrderStatusClass = (status) => {
       const statusMap = {
@@ -200,13 +221,37 @@ export default {
     }
 
     const formatDate = (dateString) => {
-      const { currentLocale } = useI18n()
       const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
       return new Date(dateString).toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
+    }
+
+    // Dates go out as the raw ISO strings rather than the localised text in the
+    // table: a spreadsheet sorts "2025-03-04" correctly and "Mar 4, 2025" not at
+    // all. The line items collapse to one cell because CSV has no nested rows.
+    const exportOrdersCsv = () => {
+      const columns = [
+        { header: t('orders.table.orderNumber'), value: (order) => order.order_number },
+        { header: t('orders.table.customer'), value: (order) => translateCustomerName(order.customer) },
+        {
+          header: t('orders.table.items'),
+          value: (order) => order.items
+            .map((item) => `${translateProductName(item.name)} x${item.quantity}`)
+            .join('; ')
+        },
+        { header: t('orders.table.status'), value: (order) => t(`status.${order.status.toLowerCase()}`) },
+        { header: t('orders.table.orderDate'), value: (order) => order.order_date },
+        { header: t('orders.table.expectedDelivery'), value: (order) => order.expected_delivery },
+        {
+          header: `${t('orders.table.totalValue')} (${currentCurrency.value})`,
+          value: (order) => order.total_value
+        }
+      ]
+
+      exportCsv('orders', columns, orders.value)
     }
 
     onMounted(loadOrders)
@@ -217,9 +262,10 @@ export default {
       error,
       orders,
       submittedOrders,
-      getOrdersByStatus,
+      orderStatusCounts,
       getOrderStatusClass,
       formatDate,
+      exportOrdersCsv,
       currencySymbol,
       translateProductName,
       translateCustomerName

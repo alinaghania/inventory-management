@@ -56,6 +56,7 @@ export default {
       shortage: '不足',
       daysDelayed: '遅延日数',
       priority: '優先度',
+      actions: '操作',
       unitsShort: '単位不足',
       days: '日'
     },
@@ -241,7 +242,8 @@ export default {
     category: 'カテゴリ',
     orderStatus: '注文ステータス',
     all: 'すべて',
-    allMonths: 'すべての月'
+    allMonths: 'すべての月',
+    resetAll: 'すべてのフィルターをリセット'
   },
 
   // Statuses
@@ -348,7 +350,9 @@ export default {
     priority: '優先度',
     dueDate: '期限',
     addTask: 'タスクを追加',
-    noTasks: 'タスクがありません。上記からタスクを追加してください！'
+    noTasks: 'タスクがありません。上記からタスクを追加してください！',
+    deleteTask: 'タスクを削除',
+    confirmDelete: '「{title}」を削除しますか？この操作は取り消せません。'
   },
 
   // Language
@@ -370,6 +374,8 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
+    exportCsv: 'CSVエクスポート',
+    exportCsvTitle: '表示中の行をCSVファイルとしてダウンロード',
     items: '件'
   },
 

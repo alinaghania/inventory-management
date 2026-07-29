@@ -120,9 +120,12 @@
                   }"
                 >
                   <td class="col-include">
+                    <!-- The column header alone is ambiguous once focus is on a
+                         row, so name the control after the item it controls -->
                     <input
                       type="checkbox"
                       :checked="!excluded[row.sku]"
+                      :aria-label="`${t('restocking.table.include')}: ${translateProductName(row.item_name)}`"
                       @change="toggleRow(row.sku)"
                     />
                   </td>
@@ -151,6 +154,7 @@
                       type="number"
                       min="0"
                       :max="row.projected_shortfall"
+                      :aria-label="`${t('restocking.table.quantity')}: ${translateProductName(row.item_name)}`"
                       :value="quantities[row.sku]"
                       :disabled="excluded[row.sku]"
                       @input="updateQuantity(row, $event.target.value)"
@@ -764,4 +768,13 @@ export default {
   background: var(--border-strong);
   cursor: not-allowed;
 }
+
+/* The :focus rule above clears the outline in favour of a border/shadow
+   treatment, which the global :focus-visible ring cannot override. Restore an
+   explicit ring for keyboard users. */
+.budget-slider:focus-visible, .qty-input:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
 </style>

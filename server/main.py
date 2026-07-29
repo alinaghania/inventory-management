@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from datetime import datetime, timedelta
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
 
 app = FastAPI(title="Factory Inventory Management System")
@@ -176,12 +176,18 @@ def allocate_budget(candidates: list, budget: float) -> tuple:
     return allocated, remaining
 
 # CORS middleware
+#
+# allow_origins=["*"] together with allow_credentials=True is a broken pairing:
+# the CORS spec forbids a wildcard on credentialed requests, so Starlette
+# reflects the caller's Origin back instead. That turns "any origin" into
+# "every origin, with cookies", which is strictly worse than naming the dev
+# client. The Vite dev server is the only browser client, so name it.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 # Data models
@@ -260,7 +266,9 @@ class Task(BaseModel):
     status: str
 
 class CreateTaskRequest(BaseModel):
-    title: str
+    # Bounded so a single request cannot park an unbounded string in the
+    # session_tasks list, which lives for the life of the process
+    title: str = Field(..., max_length=500)
     priority: str = "medium"
     dueDate: str
 
@@ -308,7 +316,9 @@ class CreateRestockingOrderLine(BaseModel):
 
 class CreateRestockingOrderRequest(BaseModel):
     budget: Optional[float] = None
-    items: List[CreateRestockingOrderLine]
+    # 32 SKUs exist, so a real order can never exceed that; the cap only stops
+    # a synthetic request from storing an arbitrarily large order in memory
+    items: List[CreateRestockingOrderLine] = Field(..., max_length=100)
 
 class RestockingOrder(BaseModel):
     id: str
@@ -607,12 +617,23 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering"""
+    # Same filter pipeline as /api/orders, so a given filter combination yields
+    # figures here that reconcile with the orders table
+    filtered_orders = filter_by_month(
+        apply_filters(orders, warehouse, category, status), month
+    )
+
     # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -653,11 +674,20 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering"""
+    filtered_orders = filter_by_month(
+        apply_filters(orders, warehouse, category, status), month
+    )
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue

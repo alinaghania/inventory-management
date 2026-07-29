@@ -2,10 +2,18 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="isOpen && product" class="modal-overlay" @click="close">
-        <div class="modal-container" @click.stop>
+        <div
+          ref="modalContainer"
+          class="modal-container"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-detail-modal-title"
+          tabindex="-1"
+          @click.stop
+        >
           <div class="modal-header">
-            <h3 class="modal-title">Product Details</h3>
-            <button class="close-button" @click="close">
+            <h3 id="product-detail-modal-title" class="modal-title">Product Details</h3>
+            <button class="close-button" aria-label="Close" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
@@ -86,8 +94,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
+import { useModalA11y } from '../composables/useModalA11y'
 
 const { currentCurrency } = useI18n()
 
@@ -111,6 +120,9 @@ const emit = defineEmits(['close'])
 const close = () => {
   emit('close')
 }
+
+const modalContainer = ref(null)
+useModalA11y(() => props.isOpen, modalContainer, close)
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'

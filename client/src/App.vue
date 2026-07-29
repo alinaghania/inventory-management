@@ -216,6 +216,29 @@ export default {
   box-sizing: border-box;
 }
 
+/* Baseline focus ring. :focus-visible so it appears for keyboard users without
+   drawing a ring around every clicked button. Individual components that set
+   `outline: none` re-declare their own :focus-visible treatment. */
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Visible to screen readers only: gives an icon-only or placeholder-only
+   control a real accessible name without changing the layout. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: var(--bg);
@@ -286,6 +309,11 @@ body {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
@@ -506,6 +534,30 @@ td.num {
   padding: var(--space-10);
   color: var(--text-muted);
   font-size: var(--text-md);
+}
+
+/* Static "Loading..." text reads as a stalled page on a slow connection, so
+   pair it with motion that shows the fetch is still in flight. */
+.loading::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto var(--space-3);
+  border: 3px solid var(--border);
+  border-top-color: var(--brand-700);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading::before {
+    animation-duration: 2.4s;
+  }
 }
 
 .error {

@@ -56,6 +56,7 @@ export default {
       shortage: 'Shortage',
       daysDelayed: 'Days Delayed',
       priority: 'Priority',
+      actions: 'Actions',
       unitsShort: 'units short',
       days: 'days'
     },
@@ -241,7 +242,8 @@ export default {
     category: 'Category',
     orderStatus: 'Order Status',
     all: 'All',
-    allMonths: 'All Months'
+    allMonths: 'All Months',
+    resetAll: 'Reset all filters'
   },
 
   // Statuses
@@ -348,7 +350,9 @@ export default {
     priority: 'Priority',
     dueDate: 'Due Date',
     addTask: 'Add Task',
-    noTasks: 'No tasks yet. Add your first task above!'
+    noTasks: 'No tasks yet. Add your first task above!',
+    deleteTask: 'Delete task',
+    confirmDelete: 'Delete "{title}"? This cannot be undone.'
   },
 
   // Language
@@ -370,6 +374,8 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
+    exportCsv: 'Export CSV',
+    exportCsvTitle: 'Download the rows currently shown as a CSV file',
     items: 'items'
   }
 }
