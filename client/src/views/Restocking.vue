@@ -488,7 +488,7 @@ export default {
   appearance: none;
   height: 6px;
   border-radius: 2px;
-  background: var(--border);
+  background: var(--chart-track);
   outline: none;
   cursor: pointer;
 }
@@ -499,7 +499,7 @@ export default {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--brand-900);
+  background: var(--chart-1);
   border: 2px solid white;
   box-shadow: none;
   cursor: pointer;
@@ -514,7 +514,7 @@ export default {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--brand-900);
+  background: var(--chart-1);
   border: 2px solid white;
   box-shadow: none;
   cursor: pointer;
@@ -532,14 +532,14 @@ export default {
 .budget-meter {
   height: 10px;
   border-radius: 2px;
-  background: var(--border);
+  background: var(--chart-track);
   overflow: hidden;
   margin-top: 1.5rem;
 }
 
 .budget-meter-fill {
   height: 100%;
-  background: var(--brand-900);
+  background: var(--chart-1);
   border-radius: 2px;
   transition: width 0.2s ease, background 0.2s ease;
 }

@@ -408,14 +408,14 @@ export default {
 
 .bar {
   width: 100%;
-  background: linear-gradient(to top, var(--brand-700), var(--brand-500));
+  background: var(--chart-1);
   border-radius: 2px 4px 0 0;
   transition: all 0.3s;
   cursor: pointer;
 }
 
 .bar:hover {
-  background: linear-gradient(to top, var(--brand-900), var(--brand-700));
+  background: var(--chart-2);
 }
 
 .bar-label {
@@ -440,7 +440,7 @@ export default {
   border-radius: 4px;
   padding: 1.5rem;
   box-shadow: none;
-  border-left: 4px solid var(--brand-700);
+  border: 1px solid var(--border);
 }
 
 .stat-label {

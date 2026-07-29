@@ -172,6 +172,9 @@ export default {
   --chart-4: #db2777;
   --chart-5: #fbcfe8;
   --chart-track: #fce7f3;
+  /* Flat wash for the accented rectangles (KPI/trend/priority cards). Filled
+     blocks replace the old 4px left rules, which read as a drop shadow. */
+  --chart-tint: #fdf2f8;
 
   /* Neutrals — paper and hairlines */
   --bg: #ffffff;
@@ -346,6 +349,11 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* Crops the page-header mascot where it bleeds past the content column,
+     instead of letting it open a horizontal scrollbar. `clip` rather than
+     `hidden`: `hidden` would turn this into a scroll container and break the
+     sticky top bar and filter toolbar inside it. */
+  overflow-x: clip;
 }
 
 .main-content {
@@ -365,27 +373,36 @@ body {
    injected here rather than repeated in seven templates. Purely decorative —
    the heading beside it carries the meaning. */
 .page-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  column-gap: var(--space-5);
-  align-items: center;
+  position: relative;
   margin-bottom: var(--space-6);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--border);
 }
 
-/* Mascot anchors the right edge and spans both title rows. Views render `<h2>`
-   plus an optional `<p>`, so it lives here rather than in seven templates.
-   Sized to the height of the title block: any taller and it would open a band
-   of empty space between the heading and the first panel. */
+/* Mascot rides the header on every view — it lives here rather than in seven
+   templates. Taken out of flow and hung off the right edge so it can be large
+   without the header reserving any height for it: the first panel still starts
+   directly under the title. It bleeds past the content column and is clipped by
+   the `overflow-x: clip` on `.app-main`, which is the intended crop.
+   Purely decorative; the heading beside it carries the meaning. */
 .page-header::after {
   content: '';
-  grid-column: 2;
-  grid-row: 1 / -1;
-  width: 112px;
-  height: 112px;
+  position: absolute;
+  right: -80px;
+  bottom: -40px;
+  width: 336px;
+  height: 336px;
   background: url('/mascot.png') center / contain no-repeat;
   animation: float-soft 3.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Keeps the title above the mascot where the two overlap */
+.page-header h2,
+.page-header p {
+  position: relative;
+  z-index: 1;
 }
 
 .page-header h2 {
