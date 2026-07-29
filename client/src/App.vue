@@ -387,17 +387,20 @@ body {
 
    Anchored from the top so it grows downward. Anchoring from the bottom sent it
    up behind the sticky filter bar (z-index 80), which left only its feet
-   showing. Growing downward runs it into the first panel instead, so it sits on
-   a negative layer: negative z-index descendants paint before in-flow block
-   backgrounds, which puts the opaque panels over it while the page stays behind
-   it. The head reads in the header band and the body disappears under the
-   panels — big, bleeding, and obscuring no figure.
+   showing. The -80px offset is as high as it goes: the artwork carries roughly
+   50px of transparent margin at this size, so the figure itself lands just
+   under the filter bar rather than behind it.
+
+   z-index is negative because it still overlaps the first panel. Negative
+   z-index descendants paint before in-flow block backgrounds, so the opaque
+   panels cover the feet while the page stays behind the rest — big, bleeding
+   past the right edge, and obscuring no figure.
    Purely decorative; the heading beside it carries the meaning. */
 .page-header::after {
   content: '';
   position: absolute;
   right: -56px;
-  top: -32px;
+  top: -80px;
   width: 260px;
   height: 260px;
   background: url('/mascot.png') top center / contain no-repeat;
