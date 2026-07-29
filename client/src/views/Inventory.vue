@@ -329,7 +329,7 @@ export default {
   width: 100%;
   padding: 0.5rem 2.5rem 0.5rem 2.5rem;
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 0.875rem;
   color: var(--text);
   background: var(--surface-muted);
@@ -340,7 +340,7 @@ export default {
   outline: none;
   border-color: var(--brand-700);
   background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: none;
 }
 
 .search-input::placeholder {
@@ -356,7 +356,7 @@ export default {
   padding: 0.25rem;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: 2px;
   color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s;
@@ -380,7 +380,7 @@ export default {
 }
 
 .error {
-  color: #ef4444;
+  color: #8c3a3a;
 }
 
 .clickable-row {

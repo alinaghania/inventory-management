@@ -497,11 +497,11 @@ export default {
 }
 
 .stat-change.positive {
-  color: #059669;
+  color: #2f5d43;
 }
 
 .stat-change.negative {
-  color: #dc2626;
+  color: #8c3a3a;
 }
 
 .change-icon {
@@ -515,29 +515,43 @@ export default {
 
 .chart-legend {
   display: flex;
+  align-items: center;
   gap: 1.5rem;
   font-size: 0.875rem;
+}
+
+/* Mascot marks the legend so it reads as a caption, not another data row */
+.chart-legend::before {
+  content: '';
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: url('/mascot.png') center / contain no-repeat;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-muted);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .legend-dot {
   width: 12px;
   height: 12px;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
-.legend-dot.procurement { background: var(--brand-700); }
-.legend-dot.operational { background: #8b5cf6; }
-.legend-dot.labor { background: #10b981; }
-.legend-dot.overhead { background: #f59e0b; }
-.legend-dot.revenue-color { background: var(--text); }
-.legend-dot.cost-color { background: #ef4444; }
+.legend-dot.procurement { background: var(--chart-1); }
+.legend-dot.operational { background: var(--chart-2); }
+.legend-dot.labor { background: var(--chart-3); }
+.legend-dot.overhead { background: var(--chart-4); }
+.legend-dot.revenue-color { background: var(--chart-1); }
+.legend-dot.cost-color { background: var(--chart-2); }
 
 .stats-grid-finance {
   display: grid;
@@ -551,7 +565,7 @@ export default {
 }
 
 .cost-card {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid #8c3a3a;
 }
 
 .profit-card {
@@ -586,18 +600,18 @@ export default {
 .revenue-bar, .cost-bar {
   width: 50%;
   max-width: 30px;
-  border-radius: 6px 6px 0 0;
+  border-radius: 2px 6px 0 0;
   transition: all 0.3s ease;
   cursor: pointer;
   min-height: 4px;
 }
 
 .revenue-bar {
-  background: var(--text);
+  background: var(--chart-1);
 }
 
 .cost-bar {
-  background: #ef4444;
+  background: var(--chart-2);
 }
 
 .revenue-bar:hover, .cost-bar:hover {
@@ -669,13 +683,13 @@ export default {
 }
 
 .bar-segment:last-child {
-  border-radius: 6px 6px 0 0;
+  border-radius: 2px 6px 0 0;
 }
 
-.bar-segment.procurement { background: var(--brand-700); }
-.bar-segment.operational { background: #8b5cf6; }
-.bar-segment.labor { background: #10b981; }
-.bar-segment.overhead { background: #f59e0b; }
+.bar-segment.procurement { background: var(--chart-1); }
+.bar-segment.operational { background: var(--chart-2); }
+.bar-segment.labor { background: var(--chart-3); }
+.bar-segment.overhead { background: var(--chart-4); }
 
 .bar-segment:hover {
   opacity: 0.8;
@@ -727,14 +741,14 @@ export default {
   width: 100%;
   height: 8px;
   background: var(--surface-muted);
-  border-radius: 4px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .category-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--brand-700) 0%, var(--brand-900) 100%);
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--chart-3) 0%, var(--chart-1) 100%);
+  border-radius: 2px;
   transition: width 0.6s ease;
 }
 
@@ -753,11 +767,11 @@ export default {
 }
 
 .change.positive {
-  color: #059669;
+  color: #2f5d43;
 }
 
 .change.negative {
-  color: #dc2626;
+  color: #8c3a3a;
 }
 
 .transactions-card {

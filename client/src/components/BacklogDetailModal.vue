@@ -152,8 +152,8 @@ const formatDate = (dateString) => {
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: none;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
@@ -186,7 +186,7 @@ const formatDate = (dateString) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.15s ease;
 }
 
@@ -213,8 +213,8 @@ const formatDate = (dateString) => {
 .shortage-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-radius: 12px;
+  background: linear-gradient(135deg, #8c3a3a 0%, #8c3a3a 100%);
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,7 +242,7 @@ const formatDate = (dateString) => {
 
 .priority-badge {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -251,18 +251,18 @@ const formatDate = (dateString) => {
 }
 
 .priority-badge.high {
-  background: #fecaca;
-  color: #991b1b;
+  background: #e3cccc;
+  color: #8c3a3a;
 }
 
 .priority-badge.medium {
-  background: #fed7aa;
-  color: #92400e;
+  background: #ecdfc4;
+  color: #9c7c2e;
 }
 
 .priority-badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #eef0f4;
+  color: #3f5068;
 }
 
 .shortage-summary {
@@ -274,18 +274,18 @@ const formatDate = (dateString) => {
 
 .summary-card {
   padding: 1.25rem;
-  border-radius: 10px;
+  border-radius: 4px;
   border: 2px solid;
 }
 
 .summary-card.danger {
-  border-color: #fecaca;
-  background: #fef2f2;
+  border-color: #e3cccc;
+  background: #f8eded;
 }
 
 .summary-card.warning {
-  border-color: #fed7aa;
-  background: #fffbeb;
+  border-color: #ecdfc4;
+  background: #faf7ee;
 }
 
 .summary-label {
@@ -304,11 +304,11 @@ const formatDate = (dateString) => {
 }
 
 .summary-card.danger .summary-value {
-  color: #dc2626;
+  color: #8c3a3a;
 }
 
 .summary-card.warning .summary-value {
-  color: #f59e0b;
+  color: #9c7c2e;
 }
 
 .info-grid {
@@ -355,7 +355,7 @@ const formatDate = (dateString) => {
   padding: 0.625rem 1.25rem;
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-body);

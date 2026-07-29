@@ -8,7 +8,7 @@ export default {
     demandForecast: 'Demand Forecast',
     restocking: 'Restocking',
     reports: 'Reports',
-    companyName: 'Catalyst Components',
+    companyName: 'Tracky',
     subtitle: 'Inventory Management System'
   },
 

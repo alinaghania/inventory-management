@@ -69,7 +69,7 @@
               <div class="info-item">
                 <div class="info-label">Units Remaining</div>
                 <div class="info-value">
-                  <span :style="{ color: inventoryItem.quantity_on_hand <= inventoryItem.reorder_point ? '#ef4444' : '#10b981' }">
+                  <span :style="{ color: inventoryItem.quantity_on_hand <= inventoryItem.reorder_point ? '#8c3a3a' : '#2f5d43' }">
                     {{ inventoryItem.quantity_on_hand - inventoryItem.reorder_point }} units
                   </span>
                 </div>
@@ -203,8 +203,8 @@ const getSummaryCardClass = () => {
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: none;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
@@ -237,7 +237,7 @@ const getSummaryCardClass = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.15s ease;
 }
 
@@ -264,7 +264,7 @@ const getSummaryCardClass = () => {
 .item-icon {
   width: 64px;
   height: 64px;
-  border-radius: 12px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,15 +273,15 @@ const getSummaryCardClass = () => {
 }
 
 .item-icon.success-icon {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #2f5d43 0%, #2f5d43 100%);
 }
 
 .item-icon.warning-icon {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, #9c7c2e 0%, #9c7c2e 100%);
 }
 
 .item-icon.danger-icon {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #8c3a3a 0%, #8c3a3a 100%);
 }
 
 .item-title-section {
@@ -304,7 +304,7 @@ const getSummaryCardClass = () => {
 
 .stock-badge {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -313,18 +313,18 @@ const getSummaryCardClass = () => {
 }
 
 .stock-badge.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: #edf3ee;
+  color: #2f5d43;
 }
 
 .stock-badge.warning {
-  background: #fed7aa;
-  color: #92400e;
+  background: #ecdfc4;
+  color: #9c7c2e;
 }
 
 .stock-badge.danger {
-  background: #fecaca;
-  color: #991b1b;
+  background: #e3cccc;
+  color: #8c3a3a;
 }
 
 .stock-summary {
@@ -336,28 +336,28 @@ const getSummaryCardClass = () => {
 
 .summary-card {
   padding: 1.25rem;
-  border-radius: 10px;
+  border-radius: 4px;
   border: 2px solid;
 }
 
 .summary-card.primary {
-  border-color: #bfdbfe;
+  border-color: #c3cad6;
   background: var(--brand-50);
 }
 
 .summary-card.success-card {
-  border-color: #a7f3d0;
-  background: #d1fae5;
+  border-color: #c2d4c7;
+  background: #edf3ee;
 }
 
 .summary-card.warning-card {
-  border-color: #fed7aa;
-  background: #fffbeb;
+  border-color: #ecdfc4;
+  background: #faf7ee;
 }
 
 .summary-card.danger-card {
-  border-color: #fecaca;
-  background: #fef2f2;
+  border-color: #e3cccc;
+  background: #f8eded;
 }
 
 .summary-label {
@@ -425,7 +425,7 @@ const getSummaryCardClass = () => {
   padding: 0.625rem 1.25rem;
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-body);

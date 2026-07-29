@@ -8,7 +8,7 @@ export default {
     demandForecast: '需要予測',
     restocking: '補充',
     reports: 'レポート',
-    companyName: '触媒コンポーネンツ',
+    companyName: 'Tracky',
     subtitle: '在庫管理システム'
   },
 

@@ -135,39 +135,65 @@ export default {
 
 <style>
 /* ============================================================================
-   Design tokens + primitives.
-   Utility class names are unchanged from the previous stylesheet, so every view
-   picks up the new look without being edited.
+   Design tokens + primitives — editorial/monochrome language.
+
+   The palette is near-monochrome (paper white, ink black, hairline grey) with a
+   single gold accent reserved for eyebrow labels and focus. Separation comes
+   from 1px rules, not shadows; radii are deliberately tiny so surfaces read as
+   printed panels rather than floating cards.
+
+   Every token name and every utility class name is unchanged from the previous
+   stylesheet, so component scoped styles pick up the new look untouched.
    ============================================================================ */
 
 :root {
-  /* Brand — deep forest green. Wordmark, active nav, primary actions. */
-  --brand-900: #14532d;
-  --brand-700: #166534;
-  --brand-500: #22c55e;
-  --brand-100: #dcfce7;
-  --brand-50: #f0fdf4;
+  /* Type stacks — Geist for UI, Geist Mono for figures, Playfair for headings */
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
 
-  /* Neutrals */
-  --bg: #f8fafc;
+  /* Ink — the "brand" is black. Wordmark, active nav, primary actions. */
+  --brand-900: #111111;
+  --brand-700: #2b2b2b;
+  --brand-500: #9c7c2e; /* gold — focus ring and eyebrow accent */
+  --brand-100: #f2f2f2;
+  --brand-50: #f7f7f7;
+
+  /* The one chromatic note in the whole system */
+  --gold: #9c7c2e;
+
+  /* Chart series — a rose ramp borrowed from lotus-mobile (#ec4899 / #fce7f3).
+     Charts are the only place this palette appears; status text and badges stay
+     on the ink scale so meaning never rides on the decorative colour.
+     Ordered for adjacency contrast, so neighbouring donut segments stay legible. */
+  --chart-1: #ec4899;
+  --chart-2: #9d174d;
+  --chart-3: #f9a8d4;
+  --chart-4: #db2777;
+  --chart-5: #fbcfe8;
+  --chart-track: #fce7f3;
+
+  /* Neutrals — paper and hairlines */
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-muted: #f8fafc;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --text: #0f172a;
-  --text-body: #334155;
-  --text-muted: #64748b;
-  --text-faint: #94a3b8;
+  --surface-muted: #f7f7f7;
+  --border: #e6e6e6;
+  --border-strong: #111111;
+  --text: #111111;
+  --text-body: #3d3d3d;
+  --text-muted: #8c8c8c;
+  --text-faint: #9a9a9a;
 
-  /* Status — tinted surface + readable foreground, one pair per state */
-  --success-bg: #dcfce7;
-  --success-fg: #065f46;
-  --warning-bg: #fef3c7;
-  --warning-fg: #92400e;
-  --danger-bg: #fee2e2;
-  --danger-fg: #991b1b;
-  --info-bg: #dbeafe;
-  --info-fg: #1e40af;
+  /* Status — desaturated ink on a barely-tinted ground, so a table of badges
+     still reads as one printed page instead of a traffic light. */
+  --success-bg: #edf3ee;
+  --success-fg: #2f5d43;
+  --warning-bg: #f7f1e3;
+  --warning-fg: #9c7c2e;
+  --danger-bg: #f8eded;
+  --danger-fg: #8c3a3a;
+  --info-bg: #eef0f4;
+  --info-fg: #3f5068;
 
   /* Spacing — 4px base */
   --space-1: 0.25rem;
@@ -179,16 +205,17 @@ export default {
   --space-8: 2rem;
   --space-10: 2.5rem;
 
-  /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Radii — near-square; panels get 4px, controls get 2px */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
   --radius-pill: 999px;
 
-  /* Elevation — deliberately shallow; borders carry most of the separation */
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  /* Elevation — none. Kept as tokens so components referencing them stay valid;
+     hairline borders carry all the separation in this language. */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
 
   /* Type */
   --text-xs: 0.6875rem;
@@ -199,12 +226,12 @@ export default {
   --text-2xl: 1.75rem;
   --text-3xl: 1.875rem;
 
-  --tracking-tight: -0.02em;
-  --tracking-wide: 0.06em;
+  --tracking-tight: 0.01em;
+  --tracking-wide: 0.16em;
 
   /* Shell geometry */
   --sidebar-w: 272px;
-  --topbar-h: 64px;
+  --topbar-h: 56px;
   --content-max: 1440px;
 
   --transition: 0.15s ease;
@@ -240,11 +267,71 @@ export default {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 14.5px;
   background: var(--bg);
   color: var(--text-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(17, 17, 17, 0.08);
+}
+
+/* --- Editorial type primitives -------------------------------------------- */
+
+/* Serif display face for wordmark and page titles */
+.doc-title {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* Panel heading: small serif caps sitting on a heavy rule, like a section head
+   in a printed report */
+.doc-section {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* The only place gold appears in body copy: tiny label above a figure */
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+}
+
+/* --- Motion --------------------------------------------------------------- */
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pop-in {
+  animation: pop-in 0.25s ease-out both;
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+.float {
+  animation: float-soft 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in,
+  .float {
+    animation: none;
+  }
 }
 
 /* --- Shell ---------------------------------------------------------------- */
@@ -265,18 +352,46 @@ body {
   flex: 1;
   width: 100%;
   max-width: var(--content-max);
-  padding: var(--space-6) var(--space-8) var(--space-10);
+  /* Centred in the column left of the sidebar, so a wide viewport doesn't
+     leave all the slack on one side */
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-8) var(--space-10);
 }
 
 /* --- Page header ---------------------------------------------------------- */
 
+/* Two columns: the mascot spans both title rows so it sits centred against the
+   whole block. Views render `<h2>` plus an optional `<p>`, so the mascot is
+   injected here rather than repeated in seven templates. Purely decorative —
+   the heading beside it carries the meaning. */
 .page-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: var(--space-5);
+  align-items: center;
   margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Mascot anchors the right edge and spans both title rows. Views render `<h2>`
+   plus an optional `<p>`, so it lives here rather than in seven templates.
+   Sized to the height of the title block: any taller and it would open a band
+   of empty space between the heading and the first panel. */
+.page-header::after {
+  content: '';
+  grid-column: 2;
+  grid-row: 1 / -1;
+  width: 112px;
+  height: 112px;
+  background: url('/mascot.png') center / contain no-repeat;
+  animation: float-soft 3.2s ease-in-out infinite;
 }
 
 .page-header h2 {
-  font-size: var(--text-3xl);
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 800;
   color: var(--text);
   margin-bottom: var(--space-2);
   letter-spacing: var(--tracking-tight);
@@ -284,8 +399,9 @@ body {
 
 .page-header p {
   color: var(--text-muted);
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
 }
+
 
 /* --- Buttons -------------------------------------------------------------- */
 /* For restyling buttons the app already has. This redesign adds no new buttons. */
@@ -294,70 +410,82 @@ body {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0.5625rem var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--text-base);
+  padding: 0.4375rem var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
   font-weight: 600;
   font-family: inherit;
-  border: 1px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
   white-space: nowrap;
 }
 
+.btn:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
 .btn svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 .btn-primary {
   background: var(--brand-900);
+  border-color: var(--brand-900);
   color: #fff;
 }
 
 .btn-primary:hover {
   background: var(--brand-700);
+  border-color: var(--brand-700);
+  color: #fff;
 }
 
 .btn-secondary {
   background: var(--surface);
-  color: var(--text-body);
+  color: var(--text);
   border-color: var(--border);
-  box-shadow: var(--shadow-xs);
 }
 
 .btn-secondary:hover {
   background: var(--surface-muted);
-  border-color: var(--border-strong);
+  border-color: var(--text);
 }
 
 /* Square icon-only button — used by FilterBar's existing reset control */
 .icon-btn {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
   background: transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background var(--transition), color var(--transition);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
 .icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 .icon-btn:hover:not(:disabled) {
   background: var(--surface-muted);
+  border-color: var(--border);
   color: var(--text);
 }
 
@@ -366,12 +494,20 @@ body {
   cursor: default;
 }
 
+/* --- Form controls -------------------------------------------------------- */
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* --- KPI cards ------------------------------------------------------------ */
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
 
@@ -380,29 +516,31 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color var(--transition);
 }
 
 .stat-card:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
 }
 
+/* Gold eyebrow over every figure — the system's one recurring accent */
 .stat-label {
-  color: var(--text-muted);
-  font-size: var(--text-xs);
-  font-weight: 600;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  margin-bottom: var(--space-2);
+  letter-spacing: 0.22em;
+  margin-bottom: var(--space-3);
 }
 
-/* Value stays neutral so a row of KPIs reads as one scale, not a traffic light */
+/* Figures set in the mono face with tabular digits so columns of KPIs align */
 .stat-value {
+  font-family: var(--font-mono);
   font-size: var(--text-2xl);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- Panels --------------------------------------------------------------- */
@@ -421,15 +559,18 @@ body {
   align-items: center;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-3);
+  /* Heavier rule than a plain divider — this is a printed section head */
+  border-bottom: 1.5px solid var(--text);
 }
 
 .card-title {
-  font-size: var(--text-lg);
+  font-family: var(--font-serif);
+  font-size: 13px;
   font-weight: 700;
   color: var(--text);
-  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 /* --- Tables --------------------------------------------------------------- */
@@ -444,25 +585,25 @@ table {
 }
 
 thead {
-  background: var(--surface-muted);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  background: transparent;
+  border-top: none;
+  border-bottom: 1px solid var(--text);
 }
 
 th {
   text-align: left;
-  padding: var(--space-3);
-  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  font-weight: 700;
   color: var(--text-muted);
-  font-size: var(--text-xs);
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: 0.16em;
   white-space: nowrap;
 }
 
 td {
   padding: var(--space-3);
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
   color: var(--text-body);
   font-size: var(--text-base);
 }
@@ -482,16 +623,21 @@ td.num {
   font-variant-numeric: tabular-nums;
 }
 
+td.num {
+  font-family: var(--font-mono);
+}
+
 /* --- Badges --------------------------------------------------------------- */
 
 .badge {
   display: inline-block;
-  padding: 0.25rem var(--space-3);
+  padding: 0.1875rem var(--space-2);
+  border: 1px solid currentColor;
   border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.12em;
   white-space: nowrap;
 }
 
@@ -523,8 +669,8 @@ td.num {
 }
 
 .badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--surface-muted);
+  color: var(--text-muted);
 }
 
 /* --- States --------------------------------------------------------------- */
@@ -533,7 +679,9 @@ td.num {
   text-align: center;
   padding: var(--space-10);
   color: var(--text-muted);
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 /* Static "Loading..." text reads as a stalled page on a slow connection, so
@@ -541,11 +689,11 @@ td.num {
 .loading::before {
   content: '';
   display: block;
-  width: 24px;
-  height: 24px;
-  margin: 0 auto var(--space-3);
-  border: 3px solid var(--border);
-  border-top-color: var(--brand-700);
+  width: 22px;
+  height: 22px;
+  margin: 0 auto var(--space-4);
+  border: 2px solid var(--border);
+  border-top-color: var(--text);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -561,12 +709,12 @@ td.num {
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-fg);
   color: var(--danger-fg);
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   margin: var(--space-4) 0;
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
 }
 </style>

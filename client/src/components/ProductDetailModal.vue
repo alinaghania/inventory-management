@@ -159,8 +159,8 @@ const getStockBadgeClass = (stockLevel) => {
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: none;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
@@ -193,7 +193,7 @@ const getStockBadgeClass = (stockLevel) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.15s ease;
 }
 
@@ -221,7 +221,7 @@ const getStockBadgeClass = (stockLevel) => {
   width: 64px;
   height: 64px;
   background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-900) 100%);
-  border-radius: 12px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,7 +249,7 @@ const getStockBadgeClass = (stockLevel) => {
 
 .stock-badge {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -258,18 +258,18 @@ const getStockBadgeClass = (stockLevel) => {
 }
 
 .stock-badge.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: #edf3ee;
+  color: #2f5d43;
 }
 
 .stock-badge.warning {
-  background: #fed7aa;
-  color: #92400e;
+  background: #ecdfc4;
+  color: #9c7c2e;
 }
 
 .stock-badge.danger {
-  background: #fecaca;
-  color: #991b1b;
+  background: #e3cccc;
+  color: #8c3a3a;
 }
 
 .info-grid {
@@ -310,7 +310,7 @@ const getStockBadgeClass = (stockLevel) => {
   padding: 0.625rem 1.25rem;
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-body);

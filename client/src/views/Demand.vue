@@ -202,12 +202,12 @@ export default {
 
       // If change is within ±2%, consider it stable and show blue
       if (changePercent <= 2) {
-        return '#3b82f6' // Blue for stable
+        return '#3f5068' // Blue for stable
       }
 
-      if (change > 0) return '#10b981' // Green for increasing
-      if (change < 0) return '#ef4444' // Red for decreasing
-      return '#3b82f6' // Blue for no change
+      if (change > 0) return '#2f5d43' // Green for increasing
+      if (change < 0) return '#8c3a3a' // Red for decreasing
+      return '#3f5068' // Blue for no change
     }
 
     const translatePeriod = (period) => {
@@ -271,17 +271,17 @@ export default {
 .trend-card {
   background: white;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 1.5rem;
   transition: all 0.2s ease;
 }
 
 .trend-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
 .increasing-card {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid #2f5d43;
 }
 
 .stable-card {
@@ -289,7 +289,7 @@ export default {
 }
 
 .decreasing-card {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid #8c3a3a;
 }
 
 .trend-header {
@@ -307,25 +307,25 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 1.75rem;
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .increasing-card .trend-icon {
-  background: #d1fae5;
-  color: #059669;
+  background: #edf3ee;
+  color: #2f5d43;
 }
 
 .stable-card .trend-icon {
-  background: #dbeafe;
+  background: #eef0f4;
   color: var(--brand-900);
 }
 
 .decreasing-card .trend-icon {
-  background: #fee2e2;
-  color: #dc2626;
+  background: #f8eded;
+  color: #8c3a3a;
 }
 
 .trend-label {
@@ -355,7 +355,7 @@ export default {
   align-items: center;
   padding: 0.5rem 0.75rem;
   background: var(--surface-muted);
-  border-radius: 6px;
+  border-radius: 2px;
   transition: background 0.2s;
 }
 
@@ -381,7 +381,7 @@ export default {
 }
 
 .increasing-card .item-change {
-  color: #059669;
+  color: #2f5d43;
 }
 
 .stable-card .item-change {
@@ -389,7 +389,7 @@ export default {
 }
 
 .decreasing-card .item-change {
-  color: #dc2626;
+  color: #8c3a3a;
 }
 
 .item-change.neutral {

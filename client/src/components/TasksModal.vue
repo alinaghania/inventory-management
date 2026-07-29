@@ -287,8 +287,8 @@ export default {
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  box-shadow: none;
   width: 90%;
   max-width: 700px;
   max-height: 85vh;
@@ -324,7 +324,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.2s ease;
 }
 
@@ -352,7 +352,7 @@ export default {
   background: var(--surface-muted);
   color: var(--text-muted);
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -365,7 +365,7 @@ export default {
 /* Task Form */
 .task-form {
   background: var(--surface-muted);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -406,7 +406,7 @@ label {
 .task-select {
   padding: 0.75rem;
   border: 2px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 0.95rem;
   transition: border-color 0.2s ease;
   font-family: inherit;
@@ -428,7 +428,7 @@ label {
   background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-900) 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
@@ -468,22 +468,22 @@ label {
 .task-item {
   background: white;
   border: 2px solid var(--border);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 1rem 1.25rem;
   transition: all 0.2s ease;
 }
 
 .task-item:hover {
   border-color: var(--border-strong);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 .task-item.priority-high {
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid #8c3a3a;
 }
 
 .task-item.priority-medium {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid #9c7c2e;
 }
 
 .task-item.priority-low {
@@ -535,10 +535,10 @@ label {
 .task-delete-btn {
   width: 28px;
   height: 28px;
-  background: #ef4444;
+  background: #8c3a3a;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
@@ -551,7 +551,7 @@ label {
 }
 
 .task-delete-btn:hover {
-  background: #dc2626;
+  background: #8c3a3a;
   transform: scale(1.1);
 }
 
@@ -566,23 +566,23 @@ label {
   font-weight: 600;
   text-transform: uppercase;
   padding: 0.25rem 0.625rem;
-  border-radius: 4px;
+  border-radius: 2px;
   letter-spacing: 0.025em;
 }
 
 .priority-badge.high {
-  background: #fecaca;
-  color: #991b1b;
+  background: #e3cccc;
+  color: #8c3a3a;
 }
 
 .priority-badge.medium {
-  background: #fed7aa;
-  color: #92400e;
+  background: #ecdfc4;
+  color: #9c7c2e;
 }
 
 .priority-badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #eef0f4;
+  color: #3f5068;
 }
 
 .task-due-date {
@@ -601,28 +601,28 @@ label {
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.25rem 0.625rem;
-  border-radius: 4px;
+  border-radius: 2px;
   margin-left: auto;
 }
 
 .status-badge.overdue {
-  background: #fecaca;
-  color: #991b1b;
+  background: #e3cccc;
+  color: #8c3a3a;
 }
 
 .status-badge.urgent {
-  background: #fed7aa;
-  color: #92400e;
+  background: #ecdfc4;
+  color: #9c7c2e;
 }
 
 .status-badge.upcoming {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #eef0f4;
+  color: #3f5068;
 }
 
 .status-badge.completed {
-  background: #d1fae5;
-  color: #065f46;
+  background: #edf3ee;
+  color: #2f5d43;
 }
 
 /* Modal transitions */

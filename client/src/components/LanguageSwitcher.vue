@@ -146,7 +146,7 @@ const selectLanguage = (locale) => {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   z-index: 1000;
   overflow: hidden;
 }

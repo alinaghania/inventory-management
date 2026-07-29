@@ -338,10 +338,10 @@ export default {
 
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 .card-header {
@@ -409,7 +409,7 @@ export default {
 .bar {
   width: 100%;
   background: linear-gradient(to top, var(--brand-700), var(--brand-500));
-  border-radius: 4px 4px 0 0;
+  border-radius: 2px 4px 0 0;
   transition: all 0.3s;
   cursor: pointer;
 }
@@ -437,9 +437,9 @@ export default {
 
 .stat-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   border-left: 4px solid var(--brand-700);
 }
 
@@ -457,33 +457,33 @@ export default {
 
 .badge {
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  border-radius: 4px;
   font-size: 0.875rem;
   font-weight: 500;
 }
 
 .badge.success {
-  background: #dcfce7;
-  color: #166534;
+  background: #edf3ee;
+  color: #2f5d43;
 }
 
 .badge.warning {
-  background: #fef3c7;
-  color: #92400e;
+  background: #f7f1e3;
+  color: #9c7c2e;
 }
 
 .badge.danger {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #f8eded;
+  color: #8c3a3a;
 }
 
 .positive-change {
-  color: #16a34a;
+  color: #2f5d43;
   font-weight: 600;
 }
 
 .negative-change {
-  color: #dc2626;
+  color: #8c3a3a;
   font-weight: 600;
 }
 
@@ -494,10 +494,10 @@ export default {
 }
 
 .error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #f8eded;
+  color: #8c3a3a;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 4px;
   margin: 1rem 0;
 }
 

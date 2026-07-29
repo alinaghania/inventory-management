@@ -178,8 +178,8 @@ useModalA11y(() => props.isOpen, modalContainer, close)
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: none;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
@@ -212,7 +212,7 @@ useModalA11y(() => props.isOpen, modalContainer, close)
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.15s ease;
 }
 
@@ -233,7 +233,7 @@ useModalA11y(() => props.isOpen, modalContainer, close)
 
 .summary-card {
   padding: 1.5rem;
-  border-radius: 10px;
+  border-radius: 4px;
   text-align: center;
 }
 
@@ -264,28 +264,28 @@ useModalA11y(() => props.isOpen, modalContainer, close)
 
 .cost-item {
   padding: 1.25rem;
-  border-radius: 10px;
+  border-radius: 4px;
   border: 2px solid;
 }
 
 .cost-item.procurement {
-  border-color: #93c5fd;
+  border-color: #c3cad6;
   background: var(--brand-50);
 }
 
 .cost-item.operational {
-  border-color: #c4b5fd;
-  background: #f5f3ff;
+  border-color: #c9c9c9;
+  background: #f4f4f4;
 }
 
 .cost-item.labor {
-  border-color: #86efac;
-  background: #f0fdf4;
+  border-color: #c2d4c7;
+  background: #edf3ee;
 }
 
 .cost-item.overhead {
-  border-color: #fcd34d;
-  background: #fffbeb;
+  border-color: #c9a961;
+  background: #faf7ee;
 }
 
 .cost-header {
@@ -298,7 +298,7 @@ useModalA11y(() => props.isOpen, modalContainer, close)
 .cost-icon {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -311,17 +311,17 @@ useModalA11y(() => props.isOpen, modalContainer, close)
 }
 
 .cost-item.operational .cost-icon {
-  background: #8b5cf6;
+  background: #5c5c5c;
   color: white;
 }
 
 .cost-item.labor .cost-icon {
-  background: #10b981;
+  background: #2f5d43;
   color: white;
 }
 
 .cost-item.overhead .cost-icon {
-  background: #f59e0b;
+  background: #9c7c2e;
   color: white;
 }
 
@@ -359,7 +359,7 @@ useModalA11y(() => props.isOpen, modalContainer, close)
   padding: 0.625rem 1.25rem;
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-body);
