@@ -1,8 +1,12 @@
 <template>
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <h1>{{ t('nav.companyName') }}</h1>
-      <span>{{ t('nav.subtitle') }}</span>
+      <!-- Decorative mascot: the wordmark beside it already names the product -->
+      <img class="brand-mascot float" src="/mascot.png" alt="" width="56" height="56">
+      <div class="brand-text">
+        <h1>{{ t('nav.companyName') }}</h1>
+        <span>{{ t('nav.subtitle') }}</span>
+      </div>
     </div>
 
     <nav class="sidebar-nav">
@@ -72,45 +76,64 @@ export default {
 }
 
 .sidebar-brand {
-  padding: var(--space-6) var(--space-5) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border);
 }
 
+.brand-mascot {
+  flex-shrink: 0;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+/* Serif wordmark, small caps — the masthead of the page */
 .sidebar-brand h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 800;
   line-height: 1.15;
-  color: var(--brand-900);
-  letter-spacing: var(--tracking-tight);
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
+/* Gold eyebrow under the wordmark, matching the KPI labels */
 .sidebar-brand span {
   display: block;
-  margin-top: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--text-muted);
+  margin-top: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gold);
 }
 
 .sidebar-nav {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-4) var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0.625rem var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--text-body);
+  padding: 0.5rem var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
   text-decoration: none;
-  font-size: var(--text-base);
-  font-weight: 500;
-  /* Transparent bar reserves the space so active items don't shift horizontally */
-  border-left: 3px solid transparent;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
   transition: background var(--transition), color var(--transition);
 }
 
@@ -126,18 +149,23 @@ export default {
 }
 
 .nav-item:hover svg {
-  color: var(--text-muted);
+  color: var(--text);
 }
 
+/* Active state is a solid ink block — no rule, no bar, just the fill */
 .nav-item.active {
-  background: var(--brand-100);
-  border-left-color: var(--brand-900);
-  color: var(--brand-900);
-  font-weight: 600;
+  background: var(--brand-900);
+  color: #ffffff;
 }
 
-.nav-item.active svg {
-  color: var(--brand-900);
+.nav-item.active:hover {
+  background: var(--brand-700);
+  color: #ffffff;
+}
+
+.nav-item.active svg,
+.nav-item.active:hover svg {
+  color: #ffffff;
 }
 
 .sidebar-footer {

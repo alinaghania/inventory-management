@@ -487,7 +487,7 @@ export default {
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
-  border-radius: 3px;
+  border-radius: 2px;
   background: var(--border);
   outline: none;
   cursor: pointer;
@@ -501,7 +501,7 @@ export default {
   border-radius: 50%;
   background: var(--brand-900);
   border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   cursor: pointer;
   transition: transform 0.15s;
 }
@@ -516,7 +516,7 @@ export default {
   border-radius: 50%;
   background: var(--brand-900);
   border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   cursor: pointer;
 }
 
@@ -525,13 +525,13 @@ export default {
 }
 
 .budget-slider:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  box-shadow: none;
 }
 
 /* Allocation meter */
 .budget-meter {
   height: 10px;
-  border-radius: 5px;
+  border-radius: 2px;
   background: var(--border);
   overflow: hidden;
   margin-top: 1.5rem;
@@ -540,12 +540,12 @@ export default {
 .budget-meter-fill {
   height: 100%;
   background: var(--brand-900);
-  border-radius: 5px;
+  border-radius: 2px;
   transition: width 0.2s ease, background 0.2s ease;
 }
 
 .budget-meter-fill.over {
-  background: #dc2626;
+  background: #8c3a3a;
 }
 
 .budget-figures {
@@ -571,7 +571,7 @@ export default {
 }
 
 .figure-value.negative {
-  color: #dc2626;
+  color: #8c3a3a;
 }
 
 /* Recommendations card */
@@ -617,10 +617,10 @@ export default {
   margin: 1rem 1.5rem 0;
   padding: 0.75rem 1rem;
   background: var(--brand-50);
-  border: 1px solid #bfdbfe;
-  border-radius: 6px;
+  border: 1px solid #c3cad6;
+  border-radius: 2px;
   font-size: 0.875rem;
-  color: #1e40af;
+  color: #3f5068;
 }
 
 .restocking-table {
@@ -659,7 +659,7 @@ export default {
 }
 
 .row-urgent td {
-  background: #fffbeb;
+  background: #faf7ee;
 }
 
 .row-excluded {
@@ -673,8 +673,8 @@ export default {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fef3c7;
-  color: #b45309;
+  background: #f7f1e3;
+  color: #9c7c2e;
   font-size: 0.688rem;
   font-weight: 700;
   margin-right: 0.375rem;
@@ -685,7 +685,7 @@ export default {
   width: 90px;
   padding: 0.375rem 0.5rem;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
@@ -695,7 +695,7 @@ export default {
 .qty-input:focus {
   outline: none;
   border-color: var(--brand-700);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: none;
 }
 
 .qty-input:disabled {
@@ -735,17 +735,17 @@ export default {
   font-size: 0.875rem;
   font-weight: 500;
   padding: 0.5rem 0.875rem;
-  border-radius: 6px;
+  border-radius: 2px;
 }
 
 .submit-banner.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: #edf3ee;
+  color: #2f5d43;
 }
 
 .submit-banner.error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #f8eded;
+  color: #8c3a3a;
 }
 
 .place-order-btn {
@@ -753,7 +753,7 @@ export default {
   background: var(--brand-900);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.938rem;
   font-weight: 600;
   cursor: pointer;

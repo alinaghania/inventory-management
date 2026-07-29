@@ -113,6 +113,8 @@ export default {
 
 .filters-container {
   max-width: var(--content-max);
+  /* Same centring as .main-content so the toolbar tracks the content column */
+  margin: 0 auto;
   padding: var(--space-2) var(--space-8);
   display: flex;
   align-items: center;
@@ -166,7 +168,7 @@ export default {
 .filter-select:focus {
   outline: none;
   border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px var(--brand-100);
+  box-shadow: none;
 }
 
 /* Matches the global .icon-btn treatment */

@@ -126,8 +126,8 @@ const formatDate = (dateString) => {
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: none;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
@@ -160,7 +160,7 @@ const formatDate = (dateString) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.15s ease;
 }
 
@@ -194,7 +194,7 @@ const formatDate = (dateString) => {
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand-900) 0%, #1e40af 100%);
+  background: linear-gradient(135deg, var(--brand-900) 0%, #3f5068 100%);
   color: white;
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@ const formatDate = (dateString) => {
   font-weight: 700;
   font-size: 2rem;
   letter-spacing: 0.025em;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: none;
 }
 
 .profile-name {
@@ -256,7 +256,7 @@ const formatDate = (dateString) => {
   padding: 0.625rem 1.25rem;
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-body);

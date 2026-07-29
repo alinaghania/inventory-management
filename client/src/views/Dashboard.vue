@@ -85,19 +85,19 @@
               <!-- Left: Donut Chart -->
               <div class="order-health-chart">
                 <svg viewBox="0 0 200 200" class="donut-svg-compact" role="img" :aria-label="orderHealthChartLabel">
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#e2e8f0" stroke-width="25"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#10b981" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--chart-track)" stroke-width="25"/>
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--chart-1)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.delivered)} 408`"
                     stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#3b82f6" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--chart-2)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.shipped)} 408`"
                     :stroke-dashoffset="`-${getCircleSegment(statusData.delivered)}`"
                     transform="rotate(-90 100 100)"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#f59e0b" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--chart-3)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.processing)} 408`"
                     :stroke-dashoffset="`-${getCircleSegment(statusData.delivered) + getCircleSegment(statusData.shipped)}`"
                     transform="rotate(-90 100 100)"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#ef4444" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--chart-4)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.backordered)} 408`"
                     :stroke-dashoffset="`-${getCircleSegment(statusData.delivered) + getCircleSegment(statusData.shipped) + getCircleSegment(statusData.processing)}`"
                     transform="rotate(-90 100 100)"/>
@@ -105,10 +105,10 @@
                   <text x="100" y="120" text-anchor="middle" class="donut-center-value">{{ orderHealthMetrics.totalOrders }}</text>
                 </svg>
                 <div class="donut-legend-compact">
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #10b981"></span>{{ t('status.delivered') }}</div>
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #3b82f6"></span>{{ t('status.shipped') }}</div>
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #f59e0b"></span>{{ t('status.processing') }}</div>
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #ef4444"></span>{{ t('status.backordered') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--chart-1)"></span>{{ t('status.delivered') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--chart-2)"></span>{{ t('status.shipped') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--chart-3)"></span>{{ t('status.processing') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--chart-4)"></span>{{ t('status.backordered') }}</div>
                 </div>
               </div>
 
@@ -141,6 +141,11 @@
         <div class="card chart-card">
           <div class="card-header">
             <h3 class="card-title">{{ t('dashboard.inventoryValue.title') }}</h3>
+            <div class="chart-legend" v-if="categoryData.length > 0">
+              <span v-for="cat in categoryData" :key="cat.category" class="legend-item">
+                <span class="legend-dot" :style="{ background: cat.color }"></span>{{ translateCategory(cat.name) }}
+              </span>
+            </div>
           </div>
           <div class="chart-content">
             <div class="horizontal-bar-chart" v-if="categoryData.length > 0">
@@ -199,7 +204,7 @@
                     </span>
                   </td>
                   <td @click="showBacklogDetail(item)" style="cursor: pointer;">
-                    <span :style="{ color: item.days_delayed > 7 ? '#ef4444' : '#f59e0b', fontWeight: 600 }">
+                    <span :style="{ color: item.days_delayed > 7 ? '#8c3a3a' : '#9c7c2e', fontWeight: 600 }">
                       {{ item.days_delayed }} {{ t('dashboard.inventoryShortages.days') }}
                     </span>
                   </td>
@@ -420,8 +425,13 @@ export default {
       // Filter inventory items to only include those with orders in the selected period
       const categoryMap = {}
 
-      // Use a single neutral slate/gray color for all categories
-      const singleColor = '#64748b' // Neutral slate gray color
+      // One swatch from the rose chart ramp per category, assigned in insertion
+      // order and cycled if there are more categories than ramp steps. The
+      // legend below the title mirrors this assignment.
+      const CHART_COLORS = [
+        'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)',
+        'var(--chart-4)', 'var(--chart-5)'
+      ]
 
       // Get SKUs from orders in the filtered time period
       const orderedSkus = new Set()
@@ -445,7 +455,7 @@ export default {
           categoryMap[cat] = {
             name: item.category,
             value: 0,
-            color: singleColor,
+            color: CHART_COLORS[Object.keys(categoryMap).length % CHART_COLORS.length],
             category: cat,
             count: 0
           }
@@ -778,7 +788,7 @@ export default {
 .kpi-card {
   background: white;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 1rem;
 }
 
@@ -812,19 +822,19 @@ export default {
   width: 100%;
   height: 6px;
   background: var(--surface-muted);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .kpi-progress {
   height: 100%;
-  background: var(--brand-700);
-  border-radius: 3px;
+  background: var(--chart-1);
+  border-radius: 2px;
   transition: width 0.6s ease;
 }
 
 .kpi-progress.success {
-  background: #10b981;
+  background: var(--chart-2);
 }
 
 .charts-grid {
@@ -860,12 +870,23 @@ export default {
   gap: 0.75rem;
 }
 
+/* Mascot marks the legend so it reads as a caption, not another data row */
+.donut-legend::before {
+  content: '';
+  width: 30px;
+  height: 30px;
+  background: url('/mascot.png') center / contain no-repeat;
+}
+
 .legend-item {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  font-size: 0.875rem;
-  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text);
 }
 
 .legend-dot {
@@ -918,13 +939,24 @@ export default {
   gap: 0.625rem 1.25rem;
 }
 
+/* Spans both columns so the mascot sits above the pairs, not inside one */
+.donut-legend-compact::before {
+  content: '';
+  grid-column: 1 / -1;
+  width: 30px;
+  height: 30px;
+  background: url('/mascot.png') center / contain no-repeat;
+}
+
 .legend-item-compact {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .order-health-metrics {
@@ -959,15 +991,15 @@ export default {
 }
 
 .metric-good {
-  color: #10b981;
+  color: #2f5d43;
 }
 
 .metric-warning {
-  color: #f59e0b;
+  color: #9c7c2e;
 }
 
 .metric-bad {
-  color: #ef4444;
+  color: #8c3a3a;
 }
 
 .horizontal-bar-chart {
@@ -996,7 +1028,7 @@ export default {
   flex: 1;
   height: 32px;
   background: var(--surface-muted);
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
@@ -1061,11 +1093,11 @@ export default {
   width: 100%;
   max-width: 60px;
   min-height: 8px;
-  background: var(--brand-700);
-  border-radius: 6px 6px 0 0;
+  background: var(--chart-1);
+  border-radius: 2px 2px 0 0;
   transition: all 0.3s ease;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: none;
 }
 
 .line-bar.empty-bar {
@@ -1075,7 +1107,7 @@ export default {
 }
 
 .line-bar:hover {
-  background: var(--brand-900);
+  background: var(--chart-2);
   transform: scaleY(1.05);
 }
 
@@ -1110,12 +1142,12 @@ export default {
 .success-icon {
   width: 48px;
   height: 48px;
-  color: #10b981;
+  color: #2f5d43;
 }
 
 .no-backlog-text {
   font-size: 1.125rem;
-  color: #10b981;
+  color: #2f5d43;
   font-weight: 600;
   margin: 0;
 }
@@ -1148,7 +1180,7 @@ export default {
   flex: 1;
   padding: 0.75rem;
   border: 2px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 0.95rem;
   transition: border-color 0.2s ease;
 }
@@ -1163,7 +1195,7 @@ export default {
   background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-900) 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
@@ -1197,7 +1229,7 @@ export default {
   gap: 0.75rem;
   padding: 0.75rem;
   background: var(--surface-muted);
-  border-radius: 8px;
+  border-radius: 4px;
   border: 2px solid transparent;
   transition: all 0.2s ease;
 }
@@ -1234,10 +1266,10 @@ export default {
 .task-delete-btn {
   width: 28px;
   height: 28px;
-  background: #ef4444;
+  background: #8c3a3a;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
@@ -1249,14 +1281,14 @@ export default {
 }
 
 .task-delete-btn:hover {
-  background: #dc2626;
+  background: #8c3a3a;
   transform: scale(1.1);
 }
 
 .po-button {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.813rem;
   font-weight: 600;
   cursor: pointer;
@@ -1272,7 +1304,7 @@ export default {
 .po-button.create:hover {
   background: var(--brand-900);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: none;
 }
 
 .po-button.view {
@@ -1283,7 +1315,7 @@ export default {
 .po-button.view:hover {
   background: var(--text-muted);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(100, 116, 139, 0.3);
+  box-shadow: none;
 }
 
 /* The :focus rule above clears the outline in favour of a border/shadow
