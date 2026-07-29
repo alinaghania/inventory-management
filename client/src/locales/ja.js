@@ -188,6 +188,44 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期の業績指標と月次トレンドを表示',
+    loading: 'レポートを読み込み中...',
+    loadError: 'レポートの読み込みに失敗しました: {message}',
+    notAvailable: '該当なし',
+    // The API returns quarter codes as "Q1-2025"; these templates reorder the
+    // parts per locale (English leads with the quarter, Japanese with the year)
+    quarterFormat: '{year}年 第{quarter}四半期',
+    monthFormat: '{year}年{month}',
+    quarterly: {
+      title: '四半期業績',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率'
+    },
+    monthlyTrend: {
+      title: '月次収益トレンド'
+    },
+    monthOverMonth: {
+      title: '前月比分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '増減',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenueYtd: '年初来総収益',
+      avgMonthlyRevenue: '月平均収益',
+      totalOrdersYtd: '年初来総注文数',
+      bestQuarter: '最高業績四半期'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: '期間',
