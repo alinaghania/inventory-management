@@ -384,18 +384,26 @@ body {
    without the header reserving any height for it: the first panel still starts
    directly under the title. It bleeds past the content column and is clipped by
    the `overflow-x: clip` on `.app-main`, which is the intended crop.
+
+   Anchored from the top so it grows downward. Anchoring from the bottom sent it
+   up behind the sticky filter bar (z-index 80), which left only its feet
+   showing. Growing downward runs it into the first panel instead, so it sits on
+   a negative layer: negative z-index descendants paint before in-flow block
+   backgrounds, which puts the opaque panels over it while the page stays behind
+   it. The head reads in the header band and the body disappears under the
+   panels — big, bleeding, and obscuring no figure.
    Purely decorative; the heading beside it carries the meaning. */
 .page-header::after {
   content: '';
   position: absolute;
-  right: -80px;
-  bottom: -40px;
-  width: 336px;
-  height: 336px;
-  background: url('/mascot.png') center / contain no-repeat;
+  right: -56px;
+  top: -32px;
+  width: 260px;
+  height: 260px;
+  background: url('/mascot.png') top center / contain no-repeat;
   animation: float-soft 3.2s ease-in-out infinite;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 /* Keeps the title above the mascot where the two overlap */
