@@ -1,0 +1,48 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Automated PR review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          track_progress: true
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request. This is a Vue 3 + FastAPI demo app;
+            see CLAUDE.md for project conventions.
+
+            Focus on:
+            1. Correctness - logic errors, unhandled edge cases, broken contracts
+               between client and server (api.js calls vs routes in server/main.py)
+            2. Vue patterns - Composition API only, unique v-for keys, no prop
+               mutation, computed for derived data, loading/error states handled
+            3. Backend - Pydantic models match the JSON data, filters use the
+               shared helpers, HTTPException for not-found
+            4. Security - input validation, no secrets committed
+            5. Tests - new endpoints covered under tests/backend
+
+            Use inline comments for specific issues, top-level comments for
+            general observations.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
