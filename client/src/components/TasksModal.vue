@@ -478,16 +478,18 @@ label {
   box-shadow: none;
 }
 
+/* Priority is carried by a flat wash across the whole block — a left rule
+   reads as a drop shadow against the flat surfaces everywhere else. */
 .task-item.priority-high {
-  border-left: 4px solid #8c3a3a;
+  background: var(--danger-bg);
 }
 
 .task-item.priority-medium {
-  border-left: 4px solid #9c7c2e;
+  background: var(--warning-bg);
 }
 
 .task-item.priority-low {
-  border-left: 4px solid var(--brand-900);
+  background: var(--surface-muted);
 }
 
 .task-item.completed {

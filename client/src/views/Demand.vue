@@ -280,16 +280,17 @@ export default {
   box-shadow: none;
 }
 
+/* Flat washes rather than left rules, matching the rest of the system */
 .increasing-card {
-  border-left: 4px solid #2f5d43;
+  background: var(--success-bg);
 }
 
 .stable-card {
-  border-left: 4px solid var(--brand-700);
+  background: var(--chart-tint);
 }
 
 .decreasing-card {
-  border-left: 4px solid #8c3a3a;
+  background: var(--danger-bg);
 }
 
 .trend-header {

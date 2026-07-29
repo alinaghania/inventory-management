@@ -560,16 +560,17 @@ export default {
   margin-bottom: 2rem;
 }
 
+/* Flat washes rather than left rules, matching the rest of the system */
 .revenue-card {
-  border-left: 4px solid var(--text);
+  background: var(--chart-tint);
 }
 
 .cost-card {
-  border-left: 4px solid #8c3a3a;
+  background: var(--danger-bg);
 }
 
 .profit-card {
-  border-left: 4px solid var(--brand-700);
+  background: var(--success-bg);
 }
 
 .stat-meta {
