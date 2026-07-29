@@ -13,11 +13,16 @@ Use the Task tool with these specialized subagents for appropriate tasks:
   - Examples: Creating components, fixing reactivity issues, performance optimization, complex state management
   - **MANDATORY RULE: ANY time you need to create or significantly modify a .vue file, you MUST delegate to vue-expert**
 - **code-reviewer**: Use after writing significant code to review quality and best practices
+- **debugger**: Use to investigate runtime errors, read stack traces, and diagnose root causes
+  - Examples: Vue `TypeError` in console, FastAPI 500/422 responses, wrong data with no error
+  - Read-only by design — it diagnoses and proposes a fix; delegate the actual edit to `vue-expert` or apply it directly
 - **Explore**: Use for understanding codebase structure, searching for patterns, or answering questions about how components work
 - **general-purpose**: Use for complex multi-step tasks or when other agents don't fit
 
 ### Skills
 - **backend-api-test** skill: Use when writing or modifying tests in `tests/backend` directory with pytest and FastAPI TestClient
+- **saas-ui-redesign** skill: Use when restyling or modernizing the client UI — sidebar navigation, design tokens, spacing, and visual consistency across `client/src`. Presentation only; never changes features or data
+- **vue-component-audit** skill: Use when asked to audit, analyze, or optimize Vue component structure in `client/src` — render performance, duplicated helpers, extractable composables and shells. Reports findings; only edits when asked
 
 ### MCP Tools
 - **ALWAYS use GitHub MCP tools** (`mcp__github__*`) for ALL GitHub operations
@@ -47,6 +52,7 @@ npm install && npm run dev
 **Filter System**: 4 filters (Time Period, Warehouse, Category, Order Status) apply to all data via query params
 **Data Flow**: Vue filters → `client/src/api.js` → FastAPI → In-memory filtering → Pydantic validation → Computed properties
 **Reactivity**: Raw data in refs (`allOrders`, `inventoryItems`), derived data in computed properties
+**Comments**: Always document non-obvious logic changes with comments
 
 ## API Endpoints
 - `GET /api/inventory` - Filters: warehouse, category

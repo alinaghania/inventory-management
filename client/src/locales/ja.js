@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -54,6 +56,7 @@ export default {
       shortage: '不足',
       daysDelayed: '遅延日数',
       priority: '優先度',
+      actions: '操作',
       unitsShort: '単位不足',
       days: '日'
     },
@@ -106,6 +109,7 @@ export default {
     title: '注文',
     description: '顧客注文の表示と管理',
     allOrders: 'すべての注文',
+    submittedOrders: '発注済み補充注文',
     totalOrders: '総注文数',
     totalRevenue: '総収益',
     avgOrderValue: '平均注文額',
@@ -123,9 +127,52 @@ export default {
       items: '品目',
       value: '価格',
       totalValue: '合計金額',
+      totalCost: '合計費用',
+      leadTime: 'リードタイム',
       status: 'ステータス',
       expectedDelivery: '予定配達日',
       actualDelivery: '実際の配達日'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充',
+    description: '需要予測に基づく予算内の補充計画',
+    budgetTitle: '利用可能予算',
+    budgetQuestion: '今回のサイクルで使える予算が{budget}だけの場合、何を購入すべきか？',
+    budgetHelp: '今回のサイクルで使える金額をスライダーで設定',
+    budgetUsed: '使用済み予算',
+    budgetRemaining: '残額',
+    overBudget: '予算超過',
+    recommendations: '推奨補充品目',
+    noRecommendations: '現在のフィルターでは補充は不要です',
+    increaseBudget: '最も安い品目を発注するには予算を{amount}以上にしてください',
+    itemsRecommended: '{total}件中{count}件に予算を配分',
+    placeOrder: '発注する',
+    placingOrder: '発注中...',
+    orderPlaced: '補充注文 {orderNumber} を送信しました',
+    orderFailed: '発注に失敗しました: {message}',
+    selectAll: 'すべて選択',
+    clearAll: 'すべて解除',
+    daysUnit: '{count}日',
+    totalUnits: '合計数量',
+    totalCost: '合計費用',
+    belowReorder: '発注点以下',
+    table: {
+      include: '含める',
+      sku: 'SKU',
+      itemName: '品目名',
+      category: 'カテゴリ',
+      warehouse: '倉庫',
+      onHand: '在庫数',
+      forecast: '予測需要',
+      shortfall: '不足数',
+      trend: '傾向',
+      unitCost: '単価',
+      leadTime: 'リードタイム',
+      quantity: '発注数',
+      lineCost: '明細金額'
     }
   },
 
@@ -194,6 +241,7 @@ export default {
     description: '四半期の業績指標と月次トレンドを表示',
     loading: 'レポートを読み込み中...',
     loadError: 'レポートの読み込みに失敗しました: {message}',
+    emptyState: '現在のフィルター条件に一致する注文がありません。フィルターを変更またはリセットしてください。',
     notAvailable: '該当なし',
     // The API returns quarter codes as "Q1-2025"; these templates reorder the
     // parts per locale (English leads with the quarter, Japanese with the year)
@@ -220,8 +268,12 @@ export default {
     },
     stats: {
       totalRevenueYtd: '年初来総収益',
+      // "YTD" only holds with no filters active; under a month or warehouse
+      // filter these totals cover the selected slice instead
+      totalRevenueFiltered: '絞り込み総収益',
       avgMonthlyRevenue: '月平均収益',
       totalOrdersYtd: '年初来総注文数',
+      totalOrdersFiltered: '絞り込み総注文数',
       bestQuarter: '最高業績四半期'
     }
   },
@@ -233,7 +285,8 @@ export default {
     category: 'カテゴリ',
     orderStatus: '注文ステータス',
     all: 'すべて',
-    allMonths: 'すべての月'
+    allMonths: 'すべての月',
+    resetAll: 'すべてのフィルターをリセット'
   },
 
   // Statuses
@@ -242,6 +295,7 @@ export default {
     shipped: '出荷済み',
     processing: '処理中',
     backordered: 'バックオーダー',
+    submitted: '発注済み',
     inStock: '在庫あり',
     lowStock: '在庫僅少',
     adequate: '適量'
@@ -339,7 +393,9 @@ export default {
     priority: '優先度',
     dueDate: '期限',
     addTask: 'タスクを追加',
-    noTasks: 'タスクがありません。上記からタスクを追加してください！'
+    noTasks: 'タスクがありません。上記からタスクを追加してください！',
+    deleteTask: 'タスクを削除',
+    confirmDelete: '「{title}」を削除しますか？この操作は取り消せません。'
   },
 
   // Language
@@ -361,6 +417,8 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
+    exportCsv: 'CSVエクスポート',
+    exportCsvTitle: '表示中の行をCSVファイルとしてダウンロード',
     items: '件'
   },
 

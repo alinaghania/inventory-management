@@ -2,10 +2,18 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="isOpen && inventoryItem" class="modal-overlay" @click="close">
-        <div class="modal-container" @click.stop>
+        <div
+          ref="modalContainer"
+          class="modal-container"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="inventory-detail-modal-title"
+          tabindex="-1"
+          @click.stop
+        >
           <div class="modal-header">
-            <h3 class="modal-title">Inventory Item Details</h3>
-            <button class="close-button" @click="close">
+            <h3 id="inventory-detail-modal-title" class="modal-title">Inventory Item Details</h3>
+            <button class="close-button" aria-label="Close" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
@@ -105,8 +113,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
+import { useModalA11y } from '../composables/useModalA11y'
 
 const { currentCurrency, translateProductName, translateWarehouse } = useI18n()
 
@@ -140,6 +149,9 @@ const stockPercentage = computed(() => {
 const close = () => {
   emit('close')
 }
+
+const modalContainer = ref(null)
+useModalA11y(() => props.isOpen, modalContainer, close)
 
 const getStockStatus = () => {
   if (!props.inventoryItem) return 'Unknown'
@@ -206,20 +218,20 @@ const getSummaryCardClass = () => {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.025em;
 }
 
 .close-button {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -230,8 +242,8 @@ const getSummaryCardClass = () => {
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-muted);
+  color: var(--text);
 }
 
 .modal-body {
@@ -245,7 +257,7 @@ const getSummaryCardClass = () => {
   align-items: center;
   gap: 1.25rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 1.5rem;
 }
 
@@ -280,13 +292,13 @@ const getSummaryCardClass = () => {
 .item-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 0.5rem 0;
 }
 
 .item-sku {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-family: 'Monaco', 'Courier New', monospace;
 }
 
@@ -330,7 +342,7 @@ const getSummaryCardClass = () => {
 
 .summary-card.primary {
   border-color: #bfdbfe;
-  background: #eff6ff;
+  background: var(--brand-50);
 }
 
 .summary-card.success-card {
@@ -353,19 +365,19 @@ const getSummaryCardClass = () => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
 .summary-value {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .summary-subtitle {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 0.25rem;
 }
 
@@ -386,24 +398,24 @@ const getSummaryCardClass = () => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .info-value {
   font-size: 0.938rem;
-  color: #0f172a;
+  color: var(--text);
   font-weight: 500;
 }
 
 .info-value.total-value {
   font-size: 1.125rem;
-  color: #2563eb;
+  color: var(--brand-900);
   font-weight: 700;
 }
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
@@ -411,20 +423,20 @@ const getSummaryCardClass = () => {
 
 .btn-secondary {
   padding: 0.625rem 1.25rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.875rem;
-  color: #334155;
+  color: var(--text-body);
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: var(--border);
+  border-color: var(--border-strong);
 }
 
 /* Modal transition animations */

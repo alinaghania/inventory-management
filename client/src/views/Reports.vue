@@ -7,6 +7,7 @@
 
     <div v-if="loading" class="loading">{{ t('reports.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-else-if="!hasData" class="empty-state">{{ t('reports.emptyState') }}</div>
     <div v-else>
       <!-- Quarterly Performance -->
       <div class="card">
@@ -104,7 +105,7 @@
       <!-- Summary Stats -->
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">{{ t('reports.stats.totalRevenueYtd') }}</div>
+          <div class="stat-label">{{ totalRevenueLabel }}</div>
           <div class="stat-value">{{ formatMoney(totalRevenue) }}</div>
         </div>
         <div class="stat-card">
@@ -112,12 +113,12 @@
           <div class="stat-value">{{ formatMoney(avgMonthlyRevenue) }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">{{ t('reports.stats.totalOrdersYtd') }}</div>
+          <div class="stat-label">{{ totalOrdersLabel }}</div>
           <div class="stat-value">{{ totalOrders }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">{{ t('reports.stats.bestQuarter') }}</div>
-          <div class="stat-value">{{ formatQuarter(bestQuarter) }}</div>
+          <div class="stat-value">{{ formatQuarter(bestQuarter) || '-' }}</div>
         </div>
       </div>
     </div>
@@ -125,14 +126,18 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, computed, watch, onMounted } from 'vue'
+import { api } from '../api'
 import { useI18n } from '../composables/useI18n'
+import { useFilters } from '../composables/useFilters'
 import { formatCurrencyWithDecimals } from '../utils/currency'
 
 // Index maps the numeric month from the API's "YYYY-MM" strings onto the
 // shared `months.*` locale keys, so month labels follow the active language.
 const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
+// Tallest bar in the revenue chart, in pixels
+const CHART_MAX_HEIGHT = 200
 
 export default {
   name: 'Reports',
@@ -144,6 +149,16 @@ export default {
     const quarterlyData = ref([])
     const monthlyData = ref([])
 
+    // Use shared filters
+    const {
+      selectedPeriod,
+      selectedLocation,
+      selectedCategory,
+      selectedStatus,
+      hasActiveFilters,
+      getCurrentFilters
+    } = useFilters()
+
     // Kept as a computed (not a plain ref) so the message re-translates when the
     // user switches language after a failed load.
     const error = computed(() => {
@@ -151,52 +166,86 @@ export default {
       return t('reports.loadError', { message: errorMessage.value })
     })
 
-    const totalRevenue = computed(() =>
-      monthlyData.value.reduce((sum, month) => sum + month.revenue, 0)
-    )
-
-    const avgMonthlyRevenue = computed(() => {
-      if (monthlyData.value.length === 0) return 0
-      return totalRevenue.value / monthlyData.value.length
-    })
-
-    const totalOrders = computed(() =>
-      monthlyData.value.reduce((sum, month) => sum + month.order_count, 0)
-    )
-
-    const bestQuarter = computed(() => {
-      let bestCode = ''
-      let bestRevenue = 0
-      for (const q of quarterlyData.value) {
-        if (q.total_revenue > bestRevenue) {
-          bestRevenue = q.total_revenue
-          bestCode = q.quarter
-        }
-      }
-      return bestCode
-    })
-
-    const maxMonthlyRevenue = computed(() =>
-      monthlyData.value.reduce((max, month) => Math.max(max, month.revenue), 0)
-    )
-
     const loadData = async () => {
       try {
         loading.value = true
+        // Cleared on every attempt, otherwise one failed load would keep the
+        // error banner up for all subsequent filter changes
         errorMessage.value = null
 
-        const quarterlyResponse = await axios.get('http://localhost:8001/api/reports/quarterly')
-        quarterlyData.value = quarterlyResponse.data
+        const filters = getCurrentFilters()
 
-        const monthlyResponse = await axios.get('http://localhost:8001/api/reports/monthly-trends')
-        monthlyData.value = monthlyResponse.data
+        // The two reports are independent, so request them together rather
+        // than paying both round-trips back to back
+        const [quarterly, monthly] = await Promise.all([
+          api.getQuarterlyReports(filters),
+          api.getMonthlyTrends(filters)
+        ])
+        quarterlyData.value = quarterly
+        monthlyData.value = monthly
       } catch (err) {
-        console.error('Load error:', err)
+        console.error('Reports load failed:', err)
         errorMessage.value = err.message
       } finally {
         loading.value = false
       }
     }
+
+    // Watch for filter changes and reload data
+    watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
+      loadData()
+    })
+
+    // A filter combination can legitimately match no orders at all
+    const hasData = computed(() => quarterlyData.value.length > 0 || monthlyData.value.length > 0)
+
+    // Every bar needs the series maximum to size itself. As a method this was
+    // recomputed per bar, making the chart O(n^2); as a computed it is cached
+    // until monthlyData changes.
+    const maxMonthlyRevenue = computed(() =>
+      monthlyData.value.reduce((max, month) => Math.max(max, month.revenue), 0)
+    )
+
+    // Single pass shared by both totals rather than one reduce per stat card
+    const totals = computed(() =>
+      monthlyData.value.reduce(
+        (acc, month) => {
+          acc.revenue += month.revenue
+          acc.orders += month.order_count
+          return acc
+        },
+        { revenue: 0, orders: 0 }
+      )
+    )
+
+    const totalRevenue = computed(() => totals.value.revenue)
+    const totalOrders = computed(() => totals.value.orders)
+
+    const avgMonthlyRevenue = computed(() =>
+      monthlyData.value.length ? totals.value.revenue / monthlyData.value.length : 0
+    )
+
+    const bestQuarter = computed(() => {
+      const best = quarterlyData.value.reduce(
+        (leader, quarter) => (quarter.total_revenue > leader.total_revenue ? quarter : leader),
+        { quarter: '', total_revenue: 0 }
+      )
+      return best.quarter
+    })
+
+    // These totals only span the year when nothing is filtered - under a month
+    // or warehouse filter they cover the selected slice, so don't claim "YTD"
+    const totalRevenueLabel = computed(() =>
+      t(hasActiveFilters.value
+        ? 'reports.stats.totalRevenueFiltered'
+        : 'reports.stats.totalRevenueYtd')
+    )
+
+    const totalOrdersLabel = computed(() =>
+      t(hasActiveFilters.value
+        ? 'reports.stats.totalOrdersFiltered'
+        : 'reports.stats.totalOrdersYtd')
+    )
 
     // Converts and formats through the shared currency helper so JA renders yen
     // instead of the dollar sign that used to be hardcoded in the template.
@@ -224,7 +273,7 @@ export default {
 
     const getBarHeight = (revenue) => {
       if (maxMonthlyRevenue.value === 0) return 0
-      return (revenue / maxMonthlyRevenue.value) * 200
+      return (revenue / maxMonthlyRevenue.value) * CHART_MAX_HEIGHT
     }
 
     const getFulfillmentClass = (rate) => {
@@ -254,9 +303,7 @@ export default {
       return `${sign}${rate.toFixed(1)}%`
     }
 
-    onMounted(() => {
-      loadData()
-    })
+    onMounted(loadData)
 
     return {
       t,
@@ -264,10 +311,13 @@ export default {
       error,
       quarterlyData,
       monthlyData,
+      hasData,
       totalRevenue,
-      avgMonthlyRevenue,
       totalOrders,
+      avgMonthlyRevenue,
       bestQuarter,
+      totalRevenueLabel,
+      totalOrdersLabel,
       formatMoney,
       formatQuarter,
       formatMonth,
@@ -301,7 +351,7 @@ export default {
 .card-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
   margin: 0;
 }
 
@@ -311,21 +361,21 @@ export default {
 }
 
 .reports-table th {
-  background: #f8fafc;
+  background: var(--surface-muted);
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: #64748b;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
 }
 
 .reports-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .reports-table tr:hover {
-  background: #f8fafc;
+  background: var(--surface-muted);
 }
 
 .chart-container {
@@ -358,20 +408,20 @@ export default {
 
 .bar {
   width: 100%;
-  background: linear-gradient(to top, #3b82f6, #60a5fa);
+  background: linear-gradient(to top, var(--brand-700), var(--brand-500));
   border-radius: 4px 4px 0 0;
   transition: all 0.3s;
   cursor: pointer;
 }
 
 .bar:hover {
-  background: linear-gradient(to top, #2563eb, #3b82f6);
+  background: linear-gradient(to top, var(--brand-900), var(--brand-700));
 }
 
 .bar-label {
   margin-top: 0.5rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   text-align: center;
   transform: rotate(-45deg);
   white-space: nowrap;
@@ -390,19 +440,19 @@ export default {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--brand-700);
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .badge {
@@ -440,7 +490,7 @@ export default {
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .error {
@@ -449,5 +499,14 @@ export default {
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
+}
+
+.empty-state {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
 }
 </style>

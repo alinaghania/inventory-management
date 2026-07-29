@@ -11,25 +11,43 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('inventory.stockLevels') }} ({{ filteredItems.length }} {{ t('inventory.skus') }})</h3>
-          <div class="search-box">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-            </svg>
-            <input
-              v-model="searchQuery"
-              type="text"
-              :placeholder="t('inventory.searchPlaceholder')"
-              class="search-input"
-            />
+          <div class="header-actions">
+            <div class="search-box">
+              <!-- The placeholder disappears once typing starts, so it cannot
+                   serve as the accessible name -->
+              <label for="inventory-search" class="sr-only">{{ t('inventory.searchPlaceholder') }}</label>
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+              <input
+                id="inventory-search"
+                v-model="searchQuery"
+                type="text"
+                :placeholder="t('inventory.searchPlaceholder')"
+                class="search-input"
+              />
+              <button
+                v-if="searchQuery"
+                @click="searchQuery = ''"
+                class="clear-search"
+                :title="t('inventory.clearSearch')"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
             <button
-              v-if="searchQuery"
-              @click="searchQuery = ''"
-              class="clear-search"
-              :title="t('inventory.clearSearch')"
+              class="btn btn-secondary"
+              :disabled="filteredItems.length === 0"
+              :title="t('common.exportCsvTitle')"
+              @click="exportInventoryCsv"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
               </svg>
+              {{ t('common.exportCsv') }}
             </button>
           </div>
         </div>
@@ -88,6 +106,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { useCsvExport } from '../composables/useCsvExport'
 import InventoryDetailModal from '../components/InventoryDetailModal.vue'
 
 export default {
@@ -113,6 +132,8 @@ export default {
 
     // Use shared filters
     const { selectedLocation, selectedCategory, getCurrentFilters } = useFilters()
+
+    const { exportCsv } = useCsvExport()
 
     // Stock status order for sorting (using status keys)
     const STATUS_ORDER = { 'lowStock': 0, 'adequate': 1, 'inStock': 2 }
@@ -201,6 +222,32 @@ export default {
       showItemModal.value = true
     }
 
+    // Exports exactly what the table shows: the global warehouse/category
+    // filters, the search box and the low-stock-first sort all flow through
+    // filteredItems. Money columns carry the currency in the header and a plain
+    // decimal in the cell so the spreadsheet reads them as numbers.
+    const exportInventoryCsv = () => {
+      const columns = [
+        { header: t('inventory.table.sku'), value: (item) => item.sku },
+        { header: t('inventory.table.itemName'), value: (item) => translateProductName(item.name) },
+        { header: t('inventory.table.category'), value: (item) => translateCategory(item.category) },
+        { header: t('inventory.table.quantityOnHand'), value: (item) => item.quantity_on_hand },
+        { header: t('inventory.table.reorderPoint'), value: (item) => item.reorder_point },
+        {
+          header: `${t('inventory.table.unitCost')} (${currentCurrency.value})`,
+          value: (item) => item.unit_cost.toFixed(2)
+        },
+        {
+          header: `${t('inventory.table.totalValue')} (${currentCurrency.value})`,
+          value: (item) => (item.quantity_on_hand * item.unit_cost).toFixed(2)
+        },
+        { header: t('inventory.table.location'), value: (item) => translateWarehouse(item.location) },
+        { header: t('inventory.table.status'), value: (item) => getStockStatus(item) }
+      ]
+
+      exportCsv('inventory', columns, filteredItems.value)
+    }
+
     onMounted(loadInventory)
 
     return {
@@ -216,6 +263,7 @@ export default {
       showItemModal,
       selectedItem,
       showItemDetail,
+      exportInventoryCsv,
       currencySymbol,
       translateProductName,
       translateWarehouse
@@ -234,7 +282,7 @@ export default {
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -244,15 +292,22 @@ export default {
   align-items: center;
   gap: 1.5rem;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .card-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
   margin: 0;
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 
 .search-box {
   position: relative;
@@ -266,30 +321,30 @@ export default {
   left: 0.75rem;
   width: 18px;
   height: 18px;
-  color: #94a3b8;
+  color: var(--text-faint);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: 0.5rem 2.5rem 0.5rem 2.5rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 0.875rem;
-  color: #0f172a;
-  background: #f8fafc;
+  color: var(--text);
+  background: var(--surface-muted);
   transition: all 0.2s;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--brand-700);
   background: white;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-input::placeholder {
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .clear-search {
@@ -302,14 +357,14 @@ export default {
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #94a3b8;
+  color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .clear-search:hover {
-  background: #e2e8f0;
-  color: #64748b;
+  background: var(--border);
+  color: var(--text-muted);
 }
 
 .clear-search svg {
@@ -321,7 +376,7 @@ export default {
 .error {
   padding: 2rem;
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .error {
@@ -334,6 +389,15 @@ export default {
 }
 
 .clickable-row:hover {
-  background: #eff6ff !important;
+  background: var(--brand-50) !important;
 }
+
+/* The :focus rule above clears the outline in favour of a border/shadow
+   treatment, which the global :focus-visible ring cannot override. Restore an
+   explicit ring for keyboard users. */
+.search-input:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
 </style>

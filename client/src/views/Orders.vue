@@ -11,25 +11,84 @@
       <div class="stats-grid">
         <div class="stat-card success">
           <div class="stat-label">{{ t('status.delivered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Delivered').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Delivered }}</div>
         </div>
         <div class="stat-card info">
           <div class="stat-label">{{ t('status.shipped') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Shipped').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Shipped }}</div>
         </div>
         <div class="stat-card warning">
           <div class="stat-label">{{ t('status.processing') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Processing').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Processing }}</div>
         </div>
         <div class="stat-card danger">
           <div class="stat-label">{{ t('status.backordered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Backordered').length }}</div>
+          <div class="stat-value">{{ orderStatusCounts.Backordered }}</div>
+        </div>
+      </div>
+
+      <!-- Restocking orders submitted this session. Intentionally not affected by
+           the global filters: hiding a just-placed order because a month or status
+           filter is set would read as a bug rather than as filtering. -->
+      <div v-if="submittedOrders.length > 0" class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ submittedOrders.length }})</h3>
+        </div>
+        <div class="table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-items">{{ t('orders.table.items') }}</th>
+                <th class="col-value">{{ t('orders.table.totalCost') }}</th>
+                <th class="col-status">{{ t('orders.table.leadTime') }}</th>
+                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th class="col-status">{{ t('orders.table.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in submittedOrders" :key="order.id">
+                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-items">
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="item in order.items" :key="item.sku" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.item_name) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ currencySymbol }}{{ item.unit_cost }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_cost.toLocaleString() }}</strong></td>
+                <td class="col-status">{{ t('restocking.daysUnit', { count: order.lead_time_days }) }}</td>
+                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-status">
+                  <span class="badge info">{{ t('status.submitted') }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
+          <button
+            class="btn btn-secondary"
+            :disabled="orders.length === 0"
+            :title="t('common.exportCsvTitle')"
+            @click="exportOrdersCsv"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+            </svg>
+            {{ t('common.exportCsv') }}
+          </button>
         </div>
         <div class="table-container">
           <table class="orders-table">
@@ -83,11 +142,12 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { useCsvExport } from '../composables/useCsvExport'
 
 export default {
   name: 'Orders',
   setup() {
-    const { t, currentCurrency, translateProductName, translateCustomerName } = useI18n()
+    const { t, currentCurrency, currentLocale, translateProductName, translateCustomerName } = useI18n()
 
     const currencySymbol = computed(() => {
       return currentCurrency.value === 'JPY' ? '¥' : '$'
@@ -95,6 +155,7 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const submittedOrders = ref([])
 
     // Use shared filters
     const {
@@ -105,11 +166,21 @@ export default {
       getCurrentFilters
     } = useFilters()
 
+    const { exportCsv } = useCsvExport()
+
     const loadOrders = async () => {
       try {
         loading.value = true
         const filters = getCurrentFilters()
-        const fetchedOrders = await api.getOrders(filters)
+
+        const [fetchedOrders, fetchedRestockingOrders] = await Promise.all([
+          api.getOrders(filters),
+          // Submitted restocking orders are session state, so a failure here
+          // must never blank out the main orders table
+          api.getRestockingOrders().catch(() => [])
+        ])
+
+        submittedOrders.value = fetchedRestockingOrders
 
         // Sort orders by order_date (earliest first)
         orders.value = fetchedOrders.sort((a, b) => {
@@ -129,9 +200,15 @@ export default {
       loadOrders()
     })
 
-    const getOrdersByStatus = (status) => {
-      return orders.value.filter(order => order.status === status)
-    }
+    // The four stat cards only need counts, so tally in one pass instead of
+    // filtering the whole order list once per card on every render
+    const orderStatusCounts = computed(() => {
+      const counts = { Delivered: 0, Shipped: 0, Processing: 0, Backordered: 0 }
+      orders.value.forEach(order => {
+        if (counts[order.status] !== undefined) counts[order.status]++
+      })
+      return counts
+    })
 
     const getOrderStatusClass = (status) => {
       const statusMap = {
@@ -144,13 +221,37 @@ export default {
     }
 
     const formatDate = (dateString) => {
-      const { currentLocale } = useI18n()
       const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
       return new Date(dateString).toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
+    }
+
+    // Dates go out as the raw ISO strings rather than the localised text in the
+    // table: a spreadsheet sorts "2025-03-04" correctly and "Mar 4, 2025" not at
+    // all. The line items collapse to one cell because CSV has no nested rows.
+    const exportOrdersCsv = () => {
+      const columns = [
+        { header: t('orders.table.orderNumber'), value: (order) => order.order_number },
+        { header: t('orders.table.customer'), value: (order) => translateCustomerName(order.customer) },
+        {
+          header: t('orders.table.items'),
+          value: (order) => order.items
+            .map((item) => `${translateProductName(item.name)} x${item.quantity}`)
+            .join('; ')
+        },
+        { header: t('orders.table.status'), value: (order) => t(`status.${order.status.toLowerCase()}`) },
+        { header: t('orders.table.orderDate'), value: (order) => order.order_date },
+        { header: t('orders.table.expectedDelivery'), value: (order) => order.expected_delivery },
+        {
+          header: `${t('orders.table.totalValue')} (${currentCurrency.value})`,
+          value: (order) => order.total_value
+        }
+      ]
+
+      exportCsv('orders', columns, orders.value)
     }
 
     onMounted(loadOrders)
@@ -160,9 +261,11 @@ export default {
       loading,
       error,
       orders,
-      getOrdersByStatus,
+      submittedOrders,
+      orderStatusCounts,
       getOrderStatusClass,
       formatDate,
+      exportOrdersCsv,
       currencySymbol,
       translateProductName,
       translateCustomerName
@@ -210,7 +313,7 @@ export default {
 
 .items-summary {
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--brand-700);
   font-weight: 500;
   list-style: none;
   user-select: none;
@@ -234,7 +337,7 @@ export default {
 }
 
 .items-summary:hover {
-  color: #2563eb;
+  color: var(--brand-900);
   text-decoration: underline;
 }
 
@@ -245,7 +348,7 @@ export default {
   left: 0;
   margin-top: 0.5rem;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 0.75rem;
@@ -259,7 +362,7 @@ export default {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--surface-muted);
 }
 
 .item-entry:last-child {
@@ -269,11 +372,11 @@ export default {
 .item-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .item-meta {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 </style>

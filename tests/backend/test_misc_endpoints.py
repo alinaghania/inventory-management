@@ -65,23 +65,34 @@ class TestDemandEndpoints:
                 assert percent_change < 2.0, \
                     f"Item {item['item_name']} has {percent_change:.2f}% change, expected < 2%"
 
-    def test_demand_forecast_has_new_items(self, client):
-        """Test that new demand forecast items exist."""
-        response = client.get("/api/demand")
-        data = response.json()
+    def test_demand_forecast_skus_exist_in_inventory(self, client):
+        """Test that every forecast SKU maps to a real inventory item.
 
-        # Check for the new items we added
-        skus = [item["item_sku"] for item in data]
+        Restocking prices recommendations from inventory.unit_cost, so a
+        forecast for a SKU we don't stock can never be acted on.
+        """
+        forecast_skus = {item["item_sku"] for item in client.get("/api/demand").json()}
+        inventory_skus = {item["sku"] for item in client.get("/api/inventory").json()}
 
-        # Should have Temperature Sensor Module and Logic Controller Board
-        assert "SNR-420" in skus, "Missing Temperature Sensor Module"
-        assert "CTL-330" in skus, "Missing Logic Controller Board"
+        orphans = forecast_skus - inventory_skus
+        assert not orphans, f"Forecast SKUs missing from inventory: {sorted(orphans)}"
+        assert len(forecast_skus) >= 15
 
-        # Verify they are marked as stable
-        for item in data:
-            if item["item_sku"] in ["SNR-420", "CTL-330"]:
-                assert item["trend"].lower() == "stable", \
-                    f"New item {item['item_name']} should have stable trend"
+    def test_demand_forecast_names_match_inventory(self, client):
+        """Test that forecast item names match inventory, so translations resolve."""
+        inventory_names = {item["sku"]: item["name"] for item in client.get("/api/inventory").json()}
+
+        for forecast in client.get("/api/demand").json():
+            assert forecast["item_name"] == inventory_names[forecast["item_sku"]]
+
+    def test_demand_forecast_spans_all_categories(self, client):
+        """Test that forecasts cover every inventory category."""
+        inventory_categories = {item["sku"]: item["category"] for item in client.get("/api/inventory").json()}
+        forecast_categories = {
+            inventory_categories[f["item_sku"]] for f in client.get("/api/demand").json()
+        }
+
+        assert forecast_categories == set(inventory_categories.values())
 
 
 class TestBacklogEndpoints:
@@ -217,6 +228,127 @@ class TestSpendingEndpoints:
             transaction = data[0]
             # Transactions should have some identifying fields
             assert isinstance(transaction, dict)
+
+
+class TestReportsEndpoints:
+    """Test suite for reports endpoints.
+
+    The reports endpoints originally ignored every filter, so the Reports page
+    silently showed whole-dataset figures while filters were active. These
+    tests pin the filtering down.
+    """
+
+    def test_get_quarterly_reports(self, client):
+        """Test getting unfiltered quarterly reports."""
+        response = client.get("/api/reports/quarterly")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert isinstance(data, list)
+
+        if len(data) > 0:
+            quarter = data[0]
+            assert "quarter" in quarter
+            assert "total_orders" in quarter
+            assert "total_revenue" in quarter
+            assert "avg_order_value" in quarter
+            assert "fulfillment_rate" in quarter
+
+    def test_get_monthly_trends(self, client):
+        """Test getting unfiltered monthly trends."""
+        response = client.get("/api/reports/monthly-trends")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert isinstance(data, list)
+
+        if len(data) > 0:
+            month = data[0]
+            assert "month" in month
+            assert "order_count" in month
+            assert "revenue" in month
+
+    def test_quarterly_month_filter_narrows_to_one_quarter(self, client):
+        """A month filter should leave only the quarter containing it."""
+        response = client.get("/api/reports/quarterly?month=2025-01")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["quarter"] == "Q1-2025"
+
+    def test_quarterly_warehouse_filter_reduces_totals(self, client):
+        """A warehouse filter should return a strict subset of the orders."""
+        unfiltered = client.get("/api/reports/quarterly").json()
+        filtered = client.get("/api/reports/quarterly?warehouse=San Francisco").json()
+
+        unfiltered_orders = sum(q["total_orders"] for q in unfiltered)
+        filtered_orders = sum(q["total_orders"] for q in filtered)
+
+        assert filtered_orders > 0
+        assert filtered_orders < unfiltered_orders
+
+    def test_monthly_trends_month_filter_returns_single_month(self, client):
+        """A month filter should collapse the trend series to that month."""
+        response = client.get("/api/reports/monthly-trends?month=2025-01")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["month"] == "2025-01"
+
+    def test_monthly_trends_category_filter_reduces_revenue(self, client):
+        """A category filter should reduce total revenue across the series."""
+        unfiltered = client.get("/api/reports/monthly-trends").json()
+        filtered = client.get("/api/reports/monthly-trends?category=sensors").json()
+
+        unfiltered_revenue = sum(m["revenue"] for m in unfiltered)
+        filtered_revenue = sum(m["revenue"] for m in filtered)
+
+        assert filtered_revenue > 0
+        assert filtered_revenue < unfiltered_revenue
+
+    def test_reports_agree_with_orders_endpoint(self, client):
+        """Reports must reconcile with /api/orders for the same filters."""
+        params = "warehouse=Tokyo&category=sensors&month=2025-01"
+        orders = client.get(f"/api/orders?{params}").json()
+        trends = client.get(f"/api/reports/monthly-trends?{params}").json()
+
+        report_orders = sum(m["order_count"] for m in trends)
+        assert report_orders == len(orders)
+
+    def test_status_filter_applies(self, client):
+        """A status filter should be honoured by both reports."""
+        unfiltered = client.get("/api/reports/quarterly").json()
+        filtered = client.get("/api/reports/quarterly?status=delivered").json()
+
+        unfiltered_orders = sum(q["total_orders"] for q in unfiltered)
+        filtered_orders = sum(q["total_orders"] for q in filtered)
+
+        assert filtered_orders < unfiltered_orders
+        # Every remaining order is delivered, so fulfillment is 100% throughout
+        assert all(q["fulfillment_rate"] == 100.0 for q in filtered)
+
+    def test_filters_matching_nothing_return_empty_lists(self, client):
+        """An over-constrained filter combination returns empty, not an error."""
+        params = "warehouse=San Francisco&category=sensors&status=backordered&month=2025-01"
+
+        quarterly = client.get(f"/api/reports/quarterly?{params}")
+        trends = client.get(f"/api/reports/monthly-trends?{params}")
+
+        assert quarterly.status_code == 200
+        assert trends.status_code == 200
+        assert quarterly.json() == []
+        assert trends.json() == []
+
+    def test_all_sentinel_is_ignored(self, client):
+        """The 'all' sentinel the UI sends must behave as no filter."""
+        unfiltered = client.get("/api/reports/quarterly").json()
+        sentinel = client.get(
+            "/api/reports/quarterly?warehouse=all&category=all&status=all&month=all"
+        ).json()
+
+        assert sentinel == unfiltered
 
 
 class TestRootEndpoint:

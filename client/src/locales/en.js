@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -54,6 +56,7 @@ export default {
       shortage: 'Shortage',
       daysDelayed: 'Days Delayed',
       priority: 'Priority',
+      actions: 'Actions',
       unitsShort: 'units short',
       days: 'days'
     },
@@ -106,6 +109,7 @@ export default {
     title: 'Orders',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
+    submittedOrders: 'Submitted Restocking Orders',
     totalOrders: 'Total Orders',
     totalRevenue: 'Total Revenue',
     avgOrderValue: 'Avg Order Value',
@@ -123,9 +127,52 @@ export default {
       items: 'Items',
       value: 'Value',
       totalValue: 'Total Value',
+      totalCost: 'Total Cost',
+      leadTime: 'Lead Time',
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
       actualDelivery: 'Actual Delivery'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan budget-driven restocking from demand forecasts',
+    budgetTitle: 'Available Budget',
+    budgetQuestion: 'If I only have {budget} to spend this cycle, what should I buy?',
+    budgetHelp: 'Drag to set how much you can spend this cycle',
+    budgetUsed: 'Budget Used',
+    budgetRemaining: 'Remaining',
+    overBudget: 'Over budget',
+    recommendations: 'Recommended Restock',
+    noRecommendations: 'No restocking needed for the current filters',
+    increaseBudget: 'Increase the budget to at least {amount} to order the cheapest item',
+    itemsRecommended: '{count} of {total} items funded',
+    placeOrder: 'Place Order',
+    placingOrder: 'Placing order...',
+    orderPlaced: 'Restocking order {orderNumber} submitted',
+    orderFailed: 'Failed to place order: {message}',
+    selectAll: 'Select All',
+    clearAll: 'Clear All',
+    daysUnit: '{count} days',
+    totalUnits: 'Total Units',
+    totalCost: 'Total Cost',
+    belowReorder: 'Below reorder point',
+    table: {
+      include: 'Include',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      category: 'Category',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      forecast: 'Forecast',
+      shortfall: 'Shortfall',
+      trend: 'Trend',
+      unitCost: 'Unit Cost',
+      leadTime: 'Lead Time',
+      quantity: 'Order Qty',
+      lineCost: 'Line Cost'
     }
   },
 
@@ -194,6 +241,7 @@ export default {
     description: 'View quarterly performance metrics and monthly trends',
     loading: 'Loading reports...',
     loadError: 'Failed to load reports: {message}',
+    emptyState: 'No orders match the current filters. Adjust or reset the filters to see reports.',
     notAvailable: 'N/A',
     // The API returns quarter codes as "Q1-2025"; these templates reorder the
     // parts per locale (English leads with the quarter, Japanese with the year)
@@ -220,8 +268,12 @@ export default {
     },
     stats: {
       totalRevenueYtd: 'Total Revenue (YTD)',
+      // "YTD" only holds with no filters active; under a month or warehouse
+      // filter these totals cover the selected slice instead
+      totalRevenueFiltered: 'Total Revenue (Filtered)',
       avgMonthlyRevenue: 'Avg Monthly Revenue',
       totalOrdersYtd: 'Total Orders (YTD)',
+      totalOrdersFiltered: 'Total Orders (Filtered)',
       bestQuarter: 'Best Performing Quarter'
     }
   },
@@ -233,7 +285,8 @@ export default {
     category: 'Category',
     orderStatus: 'Order Status',
     all: 'All',
-    allMonths: 'All Months'
+    allMonths: 'All Months',
+    resetAll: 'Reset all filters'
   },
 
   // Statuses
@@ -242,6 +295,7 @@ export default {
     shipped: 'Shipped',
     processing: 'Processing',
     backordered: 'Backordered',
+    submitted: 'Submitted',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
     adequate: 'Adequate'
@@ -339,7 +393,9 @@ export default {
     priority: 'Priority',
     dueDate: 'Due Date',
     addTask: 'Add Task',
-    noTasks: 'No tasks yet. Add your first task above!'
+    noTasks: 'No tasks yet. Add your first task above!',
+    deleteTask: 'Delete task',
+    confirmDelete: 'Delete "{title}"? This cannot be undone.'
   },
 
   // Language
@@ -361,6 +417,8 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
+    exportCsv: 'Export CSV',
+    exportCsvTitle: 'Download the rows currently shown as a CSV file',
     items: 'items'
   }
 }
