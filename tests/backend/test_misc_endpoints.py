@@ -65,23 +65,34 @@ class TestDemandEndpoints:
                 assert percent_change < 2.0, \
                     f"Item {item['item_name']} has {percent_change:.2f}% change, expected < 2%"
 
-    def test_demand_forecast_has_new_items(self, client):
-        """Test that new demand forecast items exist."""
-        response = client.get("/api/demand")
-        data = response.json()
+    def test_demand_forecast_skus_exist_in_inventory(self, client):
+        """Test that every forecast SKU maps to a real inventory item.
 
-        # Check for the new items we added
-        skus = [item["item_sku"] for item in data]
+        Restocking prices recommendations from inventory.unit_cost, so a
+        forecast for a SKU we don't stock can never be acted on.
+        """
+        forecast_skus = {item["item_sku"] for item in client.get("/api/demand").json()}
+        inventory_skus = {item["sku"] for item in client.get("/api/inventory").json()}
 
-        # Should have Temperature Sensor Module and Logic Controller Board
-        assert "SNR-420" in skus, "Missing Temperature Sensor Module"
-        assert "CTL-330" in skus, "Missing Logic Controller Board"
+        orphans = forecast_skus - inventory_skus
+        assert not orphans, f"Forecast SKUs missing from inventory: {sorted(orphans)}"
+        assert len(forecast_skus) >= 15
 
-        # Verify they are marked as stable
-        for item in data:
-            if item["item_sku"] in ["SNR-420", "CTL-330"]:
-                assert item["trend"].lower() == "stable", \
-                    f"New item {item['item_name']} should have stable trend"
+    def test_demand_forecast_names_match_inventory(self, client):
+        """Test that forecast item names match inventory, so translations resolve."""
+        inventory_names = {item["sku"]: item["name"] for item in client.get("/api/inventory").json()}
+
+        for forecast in client.get("/api/demand").json():
+            assert forecast["item_name"] == inventory_names[forecast["item_sku"]]
+
+    def test_demand_forecast_spans_all_categories(self, client):
+        """Test that forecasts cover every inventory category."""
+        inventory_categories = {item["sku"]: item["category"] for item in client.get("/api/inventory").json()}
+        forecast_categories = {
+            inventory_categories[f["item_sku"]] for f in client.get("/api/demand").json()
+        }
+
+        assert forecast_categories == set(inventory_categories.values())
 
 
 class TestBacklogEndpoints:

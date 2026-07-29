@@ -101,90 +101,98 @@ export default {
 </script>
 
 <style scoped>
+/* Slim toolbar aligned to the content column, sitting under the sticky top bar. */
 .filters-bar {
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0.75rem 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   position: sticky;
-  top: 70px;
-  z-index: 90;
+  top: var(--topbar-h);
+  z-index: 80;
 }
 
 .filters-container {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  max-width: var(--content-max);
+  padding: var(--space-2) var(--space-8);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-3);
+  min-height: 52px;
 }
 
+/* Scrolls horizontally rather than wrapping, so the toolbar stays one row */
 .filters-grid {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-3);
   flex: 1;
+  overflow-x: auto;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .filter-group label {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   white-space: nowrap;
 }
 
 .filter-select {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.813rem;
-  color: #0f172a;
-  background: white;
+  padding: 0.375rem var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color var(--transition), background var(--transition);
   font-weight: 500;
   min-width: 140px;
 }
 
 .filter-select:hover {
-  border-color: #94a3b8;
+  background: var(--surface-muted);
+  border-color: var(--border-strong);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px var(--brand-100);
 }
 
+/* Matches the global .icon-btn treatment */
 .reset-filters-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.4rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  color: #64748b;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background var(--transition), color var(--transition);
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .reset-filters-btn:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background: var(--surface-muted);
+  color: var(--text);
 }
 
 .reset-filters-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+  opacity: 0.4;
+  cursor: default;
 }
 
 .reset-filters-btn svg {

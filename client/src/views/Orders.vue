@@ -27,6 +27,53 @@
         </div>
       </div>
 
+      <!-- Restocking orders submitted this session. Intentionally not affected by
+           the global filters: hiding a just-placed order because a month or status
+           filter is set would read as a bug rather than as filtering. -->
+      <div v-if="submittedOrders.length > 0" class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ submittedOrders.length }})</h3>
+        </div>
+        <div class="table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-items">{{ t('orders.table.items') }}</th>
+                <th class="col-value">{{ t('orders.table.totalCost') }}</th>
+                <th class="col-status">{{ t('orders.table.leadTime') }}</th>
+                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th class="col-status">{{ t('orders.table.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in submittedOrders" :key="order.id">
+                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-items">
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="item in order.items" :key="item.sku" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.item_name) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ currencySymbol }}{{ item.unit_cost }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_cost.toLocaleString() }}</strong></td>
+                <td class="col-status">{{ t('restocking.daysUnit', { count: order.lead_time_days }) }}</td>
+                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-status">
+                  <span class="badge info">{{ t('status.submitted') }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
@@ -95,6 +142,7 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const submittedOrders = ref([])
 
     // Use shared filters
     const {
@@ -109,7 +157,15 @@ export default {
       try {
         loading.value = true
         const filters = getCurrentFilters()
-        const fetchedOrders = await api.getOrders(filters)
+
+        const [fetchedOrders, fetchedRestockingOrders] = await Promise.all([
+          api.getOrders(filters),
+          // Submitted restocking orders are session state, so a failure here
+          // must never blank out the main orders table
+          api.getRestockingOrders().catch(() => [])
+        ])
+
+        submittedOrders.value = fetchedRestockingOrders
 
         // Sort orders by order_date (earliest first)
         orders.value = fetchedOrders.sort((a, b) => {
@@ -160,6 +216,7 @@ export default {
       loading,
       error,
       orders,
+      submittedOrders,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
@@ -210,7 +267,7 @@ export default {
 
 .items-summary {
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--brand-700);
   font-weight: 500;
   list-style: none;
   user-select: none;
@@ -234,7 +291,7 @@ export default {
 }
 
 .items-summary:hover {
-  color: #2563eb;
+  color: var(--brand-900);
   text-decoration: underline;
 }
 
@@ -245,7 +302,7 @@ export default {
   left: 0;
   margin-top: 0.5rem;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 0.75rem;
@@ -259,7 +316,7 @@ export default {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--surface-muted);
 }
 
 .item-entry:last-child {
@@ -269,11 +326,11 @@ export default {
 .item-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .item-meta {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 </style>
